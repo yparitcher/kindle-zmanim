@@ -11,6 +11,13 @@ You should have received a copy of the GNU Lesser General Public License along w
 if not, write tothe Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA, 
 or connect to: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ****/
+#ifdef KINDLEBUILD
+#define FONTPATH "/mnt/us/zman/ezra.ttf"
+#define BASEPATH "/mnt/us/zman/base.png"
+#else
+#define FONTPATH "ezra.ttf"
+#define BASEPATH "base.png"
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -84,109 +91,19 @@ hdate getnightfall(hdate *date, location *here)
 	else {return gettzaisbaalhatanya(date, here);}
 }
 
-int parseargs(int argc, char *argv[], hdate *hebrewDate, location *here)
+int main()
 {
-	here->latitude = 40.66896;
-	here->longitude = -73.94284;
-	here->elevation = 34;
-	float timezone = -4.0;
+	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
 	time_t now = time(NULL);
 	struct tm *pltm = localtime(&now);
-	struct tm ltm = *pltm;
-	_Bool ey = 0;
-
-	if ( argc != 1 )
-	{
-		if ( argc != 8 )
-		{
-			printf("usage: year month day latitude longitude timezone Eretz_Yisroel\n       2018 01 01 40.66896 -73.94284 -4.0 0\n");
-			return 1;
-		}
-		if ( atoi(argv[1]) )
-		{
-			ltm.tm_year = (atoi(argv[1]) - 1900 );
-		}
-		else
-		{
-			printf("%s: is not a valid year\n", argv[1]);
-			return 1;
-		}
-		if ( atoi(argv[2]) )
-		{
-			ltm.tm_mon = (atoi(argv[2]) -1);
-		}
-		else
-		{
-			printf("%s: is not a valid month\n", argv[2]);
-			return 1;
-		}
-		if ( atoi(argv[3]) )
-		{
-			ltm.tm_mday = atoi(argv[3]);
-		}
-		else
-		{
-			printf("%s: is not a valid year\n", argv[3]);
-			return 1;
-		}
-		now = mktime(&ltm);
-		if ( -90 < atof(argv[4]) && atof(argv[4]) < 90 )
-		{
-			here->latitude = atof(argv[4]);
-		}
-		else
-		{
-			printf("Latitude must be between -90 and 90!\n");
-			return 1;
-		}
-		if ( -180 < atof(argv[5]) && atof(argv[5]) < 180)
-		{
-			here->longitude = atof(argv[5]);
-		}
-		else
-		{
-			printf("Longitude must be between -180 and 180!\n");
-			return 1;
-		}
-		if( -13 < atof(argv[6]) && atof(argv[6]) < 15 )
-		{
-			timezone = atof(argv[6]);
-		}
-		else
-		{
-			printf("%s: is not a valid timezone\n", argv[6]);
-			return 1;
-		}
-		if( -1 < atof(argv[7]) && atof(argv[7]) < 2 )
-		{
-				ey = atof(argv[7]);
-		}
-		else
-		{
-			printf("%s: is not a valid boolean, use 0 or 1\n", argv[6]);
-			return 1;
-		}
-	}
-
-	long int offset = (long int) 3600 * timezone;
-
-	*hebrewDate = convertDate(&ltm);
-	hebrewDate->offset=offset;
-	setEY(hebrewDate, ey);
-	return 0;
-}
-
-int main(int argc, char *argv[])
-{
-	location here;
-	hdate hebrewDate;
-	parseargs(argc, argv, &hebrewDate, &here);
+	hdate hebrewDate = convertDate(pltm);
+	hebrewDate.offset=pltm->tm_gmtoff;
+	setEY(&hebrewDate, 0);
 
 	FBInkConfig config1 = {.is_quiet=1, .halign=EDGE, .is_cleared=1, .bg_color=BG_GRAYD};
 	fbink_init(FBFD_AUTO, &config1);
-	fbink_add_ot_font("/mnt/us/zman/ezra.ttf", FNT_REGULAR);
-	fbink_print_image(FBFD_AUTO, "/mnt/us/zman/base.png", 0, 0, &config1);
-//fbink_print(FBFD_AUTO, "", &config1);
+	fbink_add_ot_font(FONTPATH, FNT_REGULAR);
+	fbink_print_image(FBFD_AUTO, BASEPATH, 0, 0, &config1);
 
 	FBInkConfig config6 = {.is_quiet=1, .halign=EDGE, .is_centered=1, .bg_color=BG_GRAYD};
 	fbink_init(FBFD_AUTO, &config6);
@@ -194,7 +111,7 @@ int main(int argc, char *argv[])
 	
 	char kzman0[50]={'\0'};
 	hdate night = getnightfall(&hebrewDate, &here);
-	if (hdatetime_t(&hebrewDate) > hdatetime_t(&night))
+	if (hdatecompare(hebrewDate, night) < 0)
 	{
 		hdateaddday(&hebrewDate, 1);
 		strncat(kzman0, "ליל ", strlen("ליל "));

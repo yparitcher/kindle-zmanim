@@ -6,7 +6,7 @@ PREFIX=$$HOME/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-
 CC=gcc
 AR=ar
 RANLIB=ranlib
-CFLAGS=-Wall -Wextra -Wno-format-truncation -O2 -std=c99 -pedantic $(INC_DIR:%=-I%)
+CFLAGS=-Wall -Wextra -O2 -std=gnu99 -pedantic $(INC_DIR:%=-I%)
 
 LIBS=:libzmanim.a fbink m
 INC_DIR = libzmanim/include FBInk
@@ -35,5 +35,5 @@ clean:
 
 kindle:
 	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
-	$(MAKE) program CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib
+	$(MAKE) program CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD
 

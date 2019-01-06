@@ -1,0 +1,24 @@
+#!/bin/sh
+
+PROGRAM=/mnt/us/zman/zman.sh
+WORKDIR=/mnt/us/zman
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+
+do_program()
+{
+	if [[ -f "$PROGRAM" ]]; then
+	  $PROGRAM calculate
+	fi
+}
+
+lipc-wait-event -m com.lab126.powerd goingToScreenSaver,readyToSuspend | while read event; do
+	case "$event" in
+		goingToScreenSaver*)
+			do_program;;
+		readyToSuspend*)
+			do_program;
+	esac
+done;
+

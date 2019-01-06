@@ -1,0 +1,44 @@
+#!/bin/sh
+
+_FUNCTIONS=/etc/rc.d/functions
+[ -f ${_FUNCTIONS} ] && . ${_FUNCTIONS}
+
+
+KZMAND=/usr/local/bin/zman_backround
+
+start()
+{
+	${KZMAND} &
+}
+
+stop()
+{
+	echo not implemented
+}
+
+case "$1" in
+
+	start)
+		start
+		;;
+
+	stop)
+		stop
+		;;
+	
+	restart)
+		stop
+		;;
+	
+	status)
+		stop
+		;;
+
+	*)
+		msg "Usage: $0 start" W
+		exit 1
+		;;
+esac
+
+exit 0
+

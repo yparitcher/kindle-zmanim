@@ -1,0 +1,15 @@
+#!/bin/bash
+
+convert -density 167 -depth 8 -size 600x50 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 12 -gravity NorthEast -annotate +30+10 'ה\"ב'  -stroke black -strokewidth 6 -draw "line 0,50 600,50" 000.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 010.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'רחשה תולע' -stroke black -strokewidth 6 -draw "line 0,75 600,75" 030.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'ריכישמ'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 040.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'המחה ץנ'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 050.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 22 -gravity East -annotate +30+0 'עמש תאירק'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 060.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'תוצח'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 070.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'הלודג החנמ'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 080.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 22 -gravity East -annotate +30+0 'העיקש'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 090.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'םיבכוכה תאצ'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 100.png
+#convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ./ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'תבשה תאיצי'  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 100.png
+convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black -stroke black -strokewidth 6 -draw "line 0,75 600,75" 020.png
+convert -density 167 -depth 8 [0-9][0-9]0.png -append -stroke black -strokewidth 6 -draw "line 0,0 0,800" -draw "line 600,0 600,800" -draw "line 0,0 600,0" frame20.png

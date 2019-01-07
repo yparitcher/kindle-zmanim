@@ -115,6 +115,8 @@ int main()
 	{
 		hdateaddday(&hebrewDate, 1);
 		strncat(kzman0, "ליל ", strlen("ליל "));
+	}else if (hdatecompare(hebrewDate, getalosbaalhatanya(&hebrewDate, &here)) > 0){
+		strncat(kzman0, "ליל ", strlen("ליל "));
 	}
 	strncat(kzman0, hdateformat(&hebrewDate), strlen(hdateformat(&hebrewDate)));
 	reverse_string(kzman0);

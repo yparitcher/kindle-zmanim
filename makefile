@@ -18,7 +18,7 @@ LDLIBS=$(LIBS:%=-l%)
 TARGETLIBZMANIM= all
 TARGETFBINK= linux
 
-default: submodules program
+default: submodules program delta
 
 
 submodules: libzmanim FBInk
@@ -31,9 +31,10 @@ FBInk:
 
 clean:
 	$(MAKE) submodules TARGETLIBZMANIM=cleaner TARGETFBINK=clean
-	rm program
+	rm program delta
 
 kindle:
 	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
 	$(MAKE) program CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD
+	$(MAKE) delta CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD
 

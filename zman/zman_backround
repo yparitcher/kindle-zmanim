@@ -13,12 +13,19 @@ do_program()
 	fi
 }
 
+run_program()
+{
+	if [[ -f "$PROGRAM" ]]; then
+	  $PROGRAM run
+	fi
+}
+
 lipc-wait-event -m com.lab126.powerd goingToScreenSaver,readyToSuspend | while read event; do
 	case "$event" in
 		goingToScreenSaver*)
 			do_program;;
 		readyToSuspend*)
-			do_program;
+			run_program;
 	esac
 done;
 

@@ -16,7 +16,7 @@ run()
 	calculate
 	DELTA=$($WORKDIR/delta)
 	lipc-set-prop -i  com.lab126.powerd rtcWakeup $DELTA
-	msg "$(cat /proc/driver/rtc)" I
+	msg "zman: delta" I
 }
 
 # Main

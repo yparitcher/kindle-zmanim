@@ -23,13 +23,10 @@ or connect to: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#define NONE LIBZMANIMNONE
 #include "hebrewcalendar.h"
 #include "zmanim.h"
 #include "hdateformat.h"
-#define NONE FBINKNONE
 #include "fbink.h"
-#undef NONE
 
 int fontsize = 30;
 int spacing = 13;

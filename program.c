@@ -14,9 +14,11 @@ or connect to: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 #ifdef KINDLEBUILD
 #define FONTPATH "/mnt/us/zman/ezra.ttf"
 #define BASEPATH "/mnt/us/zman/base.png"
+#define BGPSHPATH "/mnt/us/zman/bgpicshuir.png"
 #else
 #define FONTPATH "ezra.ttf"
 #define BASEPATH "base.png"
+#define BGPSHPATH "bgpicshuir.png"
 #endif
 
 #include <stdlib.h>
@@ -26,6 +28,7 @@ or connect to: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 #include "hebrewcalendar.h"
 #include "zmanim.h"
 #include "hdateformat.h"
+#include "shuir.h"
 #include "fbink.h"
 
 int fontsize = 30;
@@ -88,14 +91,10 @@ hdate getnightfall(hdate *date, location *here)
 	else {return gettzaisbaalhatanya(date, here);}
 }
 
-int main()
+int zman(hdate date, location place)
 {
-	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
-	time_t now = time(NULL);
-	struct tm *pltm = localtime(&now);
-	hdate hebrewDate = convertDate(pltm);
-	hebrewDate.offset=pltm->tm_gmtoff;
-	setEY(&hebrewDate, 0);
+	location here = place;
+	hdate hebrewDate = date;
 
 	FBInkConfig config1 = {.is_quiet=1, .halign=EDGE, .is_cleared=1, .bg_color=BG_GRAYD};
 	fbink_init(FBFD_AUTO, &config1);
@@ -165,4 +164,75 @@ int main()
 
 	fbink_free_ot_fonts();
 	return 0;
+}
+
+int shuir(hdate date, location place)
+{
+	location here = place;
+	hdate hebrewDate = date;
+
+	FBInkConfig config1 = {.is_quiet=1, .halign=EDGE, .is_cleared=1, .bg_color=BG_GRAYD};
+	fbink_init(FBFD_AUTO, &config1);
+	fbink_add_ot_font(FONTPATH, FNT_REGULAR);
+	fbink_print_image(FBFD_AUTO, BGPSHPATH, 0, 0, &config1);
+
+	FBInkConfig config6 = {.is_quiet=1, .halign=EDGE, .is_centered=1, .bg_color=BG_GRAYD};
+	fbink_init(FBFD_AUTO, &config6);
+	FBInkOTConfig fontconf7 = {.margins={.top=50,.right=0}, .size_pt=fontsize};
+	
+	char kzman0[50]={'\0'};
+	hdate night = getnightfall(&hebrewDate, &here);
+	if (hdatecompare(hebrewDate, night) < 0)
+	{
+		hdateaddday(&hebrewDate, 1);
+		strncat(kzman0, "ליל ", strlen("ליל "));
+	}else if (hdatecompare(hebrewDate, getalosbaalhatanya(&hebrewDate, &here)) > 0){
+		strncat(kzman0, "ליל ", strlen("ליל "));
+	}
+	strncat(kzman0, hdateformat(&hebrewDate), strlen(hdateformat(&hebrewDate)));
+	reverse_string(kzman0);
+	topstart = fbink_print_ot(FBFD_AUTO, kzman0, &fontconf7, &config6)+spacing;
+	fontconf7.margins.top += 75;
+
+	char chumashbuf[100]={'\0'};
+	chumash(hebrewDate, chumashbuf);
+	reverse_string(chumashbuf);
+//	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
+	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", chumashbuf)+spacing;
+	fontconf7.margins.top += 75;
+	
+fontconf7.margins.top += 75;
+
+	char tehillimbuf[100]={'\0'};
+	tehillim(hebrewDate, tehillimbuf);
+	reverse_string(tehillimbuf);
+//	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
+	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", tehillimbuf)+spacing;
+	fontconf7.margins.top += 75;
+
+fontconf7.margins.top += 75;
+fontconf7.margins.top += 150;
+
+	char rambambuf[100]={'\0'};
+	rambam(hebrewDate, rambambuf);
+	reverse_string(rambambuf);
+//	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
+	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", rambambuf)+spacing;
+	fontconf7.margins.top += 75;
+
+	fbink_free_ot_fonts();
+	return 0;
+}
+
+int main(int argc, __attribute__((unused)) char* argv[])
+{
+	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
+	time_t now = time(NULL);
+	struct tm *pltm = localtime(&now);
+	hdate hebrewDate = convertDate(pltm);
+	hebrewDate.offset=pltm->tm_gmtoff;
+	setEY(&hebrewDate, 0);
+
+	if (argc > 1) {return shuir(hebrewDate, here);}
+	else {return zman(hebrewDate, here);}
 }

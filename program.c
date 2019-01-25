@@ -196,35 +196,54 @@ int shuir(hdate date, location place)
 
 	char chumashbuf[100]={'\0'};
 	chumash(hebrewDate, chumashbuf);
+	char * chb2 = strchr(chumashbuf, '\n');
+	*chb2++ = '\0';
 	reverse_string(chumashbuf);
-//	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
 	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", chumashbuf)+spacing;
 	fontconf7.margins.top += 75;
+	reverse_string(chb2);
+	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", chb2)+spacing;
+	fontconf7.margins.top += 75;
 	
-fontconf7.margins.top += 75;
-
 	char tehillimbuf[100]={'\0'};
 	tehillim(hebrewDate, tehillimbuf);
+	char * teb2 = strchr(tehillimbuf, '\n');
+	*teb2++ = '\0';
 	reverse_string(tehillimbuf);
-//	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
 	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", tehillimbuf)+spacing;
 	fontconf7.margins.top += 75;
+	reverse_string(teb2);
+	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", teb2)+spacing;
+	fontconf7.margins.top += 75;
 
-fontconf7.margins.top += 75;
 fontconf7.margins.top += 150;
 
 	char rambambuf[100]={'\0'};
 	rambam(hebrewDate, rambambuf);
+	char * rab2 = strchr(rambambuf, '\n');
+	*rab2++ = '\0';
+	char * rab3 = strstr(rab2, " - ");
+	if (rab3){
+		memset(rab3, '\0', sizeof(char)*2);
+		rab3+=sizeof(char)*2;
+	}
 	reverse_string(rambambuf);
-//	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
 	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", rambambuf)+spacing;
 	fontconf7.margins.top += 75;
+	reverse_string(rab2);
+	topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", rab2)+spacing;
+	fontconf7.margins.top += 75;
+	if (rab3){
+		reverse_string(++rab3);
+		topstart = fbink_printf(FBFD_AUTO, &fontconf7, &config6, "%s", rab3)+spacing;
+		fontconf7.margins.top += 75;
+	}
 
 	fbink_free_ot_fonts();
 	return 0;
 }
 
-int main(int argc, __attribute__((unused)) char* argv[])
+int main(int argc, char* argv[])
 {
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
 	time_t now = time(NULL);
@@ -233,6 +252,12 @@ int main(int argc, __attribute__((unused)) char* argv[])
 	hebrewDate.offset=pltm->tm_gmtoff;
 	setEY(&hebrewDate, 0);
 
-	if (argc > 1) {return shuir(hebrewDate, here);}
-	else {return zman(hebrewDate, here);}
+	if (argc > 1)
+	{
+		if(!strcmp(argv[1], "shuir")){return shuir(hebrewDate, here);}
+		else if(!strcmp(argv[1], "zman")){return zman(hebrewDate, here);}
+	}
+	srand(time(NULL));
+	if (rand()%2) {return shuir(hebrewDate, here);}
+	else { return zman(hebrewDate, here);}
 }

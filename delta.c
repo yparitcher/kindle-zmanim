@@ -8,7 +8,7 @@ Copyright (c) 2019 Y Paritcher
 #include "zmanim.h"
 //#include <openlipc.h>
 
-hdate getnightfall(hdate *date, location *here)
+hdate getnightfall(hdate date, location here)
 {
 	if (isassurbemelachah(date))
 		{return gettzais8p5(date, here);}
@@ -21,21 +21,21 @@ int main()
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
 	time_t now = time(NULL);
 	struct tm *pltm = localtime(&now);
-	hdate hebrewDate = convertDate(pltm);
+	hdate hebrewDate = convertDate(*pltm);
 	hebrewDate.offset=pltm->tm_gmtoff;
 	setEY(&hebrewDate, 0);
-	hdate next = getalosbaalhatanya(&hebrewDate, &here);
+	hdate next = getalosbaalhatanya(hebrewDate, here);
 	if 	(hdatecompare(hebrewDate, next) != 1)
 	{
-		next = getnightfall(&hebrewDate, &here);
+		next = getnightfall(hebrewDate, here);
 	}
 	if 	(hdatecompare(hebrewDate, next) != 1)
 	{
 		hdate tomorrow = hebrewDate;
 		hdateaddday(&tomorrow, 1);
-		next = getalosbaalhatanya(&tomorrow, &here);
+		next = getalosbaalhatanya(tomorrow, here);
 	}
-	delta = hdatetime_t(&next) - hdatetime_t(&hebrewDate);
+	delta = hdatetime_t(next) - hdatetime_t(hebrewDate);
 	delta += 120;
 
 /*	LIPC *lipc;

@@ -13,7 +13,6 @@ calculate()
 
 run()
 {
-	calculate
 	DELTA=$($WORKDIR/delta)
 	lipc-set-prop -i  com.lab126.powerd rtcWakeup $DELTA
 	msg "zman: delta" I

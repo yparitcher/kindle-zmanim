@@ -1,7 +1,6 @@
 #!/bin/sh
 
 PROGRAM=/mnt/us/zman/zman.sh
-WORKDIR=/mnt/us/zman
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
@@ -13,6 +12,13 @@ do_program()
 	fi
 }
 
+wake_program()
+{
+	if [[ $(lipc-get-prop com.lab126.powerd state) == screenSaver ]] && [[ -f "$PROGRAM" ]]; then
+	  $PROGRAM calculate
+	fi
+}
+
 run_program()
 {
 	if [[ -f "$PROGRAM" ]]; then
@@ -20,12 +26,14 @@ run_program()
 	fi
 }
 
-lipc-wait-event -m com.lab126.powerd goingToScreenSaver,readyToSuspend | while read event; do
+lipc-wait-event -m com.lab126.powerd goingToScreenSaver,resuming,readyToSuspend | while read event; do
 	case "$event" in
 		goingToScreenSaver*)
 			do_program;;
+		resuming*)
+			wake_program;;
 		readyToSuspend*)
-			run_program;
+			run_program;;
 	esac
 done;
 

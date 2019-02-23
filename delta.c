@@ -28,15 +28,15 @@ int main()
 	if 	(hdatecompare(hebrewDate, next) != 1)
 	{
 		next = getnightfall(hebrewDate, here);
-	}
-	if 	(hdatecompare(hebrewDate, next) != 1)
-	{
-		hdate tomorrow = hebrewDate;
-		hdateaddday(&tomorrow, 1);
-		next = getalosbaalhatanya(tomorrow, here);
+		if 	(hdatecompare(hebrewDate, next) != 1)
+		{
+			hdate tomorrow = hebrewDate;
+			hdateaddday(&tomorrow, 1);
+			next = getalosbaalhatanya(tomorrow, here);
+		}
 	}
 	delta = hdatetime_t(next) - hdatetime_t(hebrewDate);
-	delta += 120;
+	delta += 45;
 
 /*	LIPC *lipc;
 	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}

@@ -8,4 +8,6 @@ program.c executes it.
 
 delta.c set the rtc to wakeup and refresh the screensaver on day change.
 
-the scripts in ./zman/ create the backround pictures and run the program / start an boot.
+the scripts in ./utils/ create the backround pictures.
+
+the scripts in ./zman/ are used on the kindle to run the program and start an boot.

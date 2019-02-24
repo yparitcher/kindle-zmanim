@@ -1,0 +1,11 @@
+#####
+# Copyright (c) 2019 Y Paritcher
+#####
+
+program to display zmanim as a screensaver for kindle 4 (K4NT).
+
+program.c executes it.
+
+delta.c set the rtc to wakeup and refresh the screensaver on day change.
+
+the scripts in ./zman/ create the backround pictures and run the program / start an boot.

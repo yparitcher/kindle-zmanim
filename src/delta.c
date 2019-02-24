@@ -6,7 +6,7 @@ Copyright (c) 2019 Y Paritcher
 #include <time.h>
 #include "hebrewcalendar.h"
 #include "zmanim.h"
-//#include <openlipc.h>
+#include "openlipc.h"
 
 hdate getnightfall(hdate date, location here)
 {
@@ -38,13 +38,14 @@ int main()
 	delta = hdatetime_t(next) - hdatetime_t(hebrewDate);
 	delta += 45;
 
-/*	LIPC *lipc;
+#ifdef KINDLEBUILD
+	LIPC *lipc;
 	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}
   	LIPCcode ret = LIPC_OK;
   	ret = LipcSetIntProperty(lipc, "com.lab126.powerd", "rtcWakeup", delta);
 	LipcClose(lipc);
 	printf("%d\n", ret);
-*/
+#endif
 
 	printf("%d", delta);
 	return 0;

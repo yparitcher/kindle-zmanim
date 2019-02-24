@@ -10,15 +10,13 @@ WORKDIR=/mnt/us/zman
 
 calculate()
 {
-	msg "zman: calculate" I
 	$WORKDIR/program
 	msg "zman: new picture" I
 }
 
 run()
 {
-	DELTA=$($WORKDIR/delta)
-	lipc-set-prop -i  com.lab126.powerd rtcWakeup $DELTA
+	$WORKDIR/delta
 	msg "zman: delta" I
 }
 

@@ -4,6 +4,3 @@
 [submodule "FBInk"]
 	path = FBInk
 	url = https://github.com/NiLuJe/FBInk.git
-[submodule "openlipc"]
-	path = openlipc
-	url = https://github.com/Arkq/openlipc.git

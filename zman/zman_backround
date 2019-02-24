@@ -4,7 +4,11 @@
 # Copyright (c) 2019 Y Paritcher
 #####
 
-PROGRAM=/mnt/us/zman/zman.sh
+_FUNCTIONS=/etc/rc.d/functions
+[ -f ${_FUNCTIONS} ] && . ${_FUNCTIONS}
+WORKDIR=/mnt/us/zman
+PROGRAM=$WORKDIR/program
+DELTA=$WORKDIR/delta
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
@@ -12,21 +16,23 @@ export LC_ALL=en_US.UTF-8
 do_program()
 {
 	if [[ -f "$PROGRAM" ]]; then
-	  $PROGRAM calculate
+		$PROGRAM
+		msg "zman: new picture" I
 	fi
 }
 
 wake_program()
 {
-	if [[ $(lipc-get-prop com.lab126.powerd state) == screenSaver ]] && [[ -f "$PROGRAM" ]]; then
-	  $PROGRAM calculate
+	if [[ $(lipc-get-prop com.lab126.powerd state) == screenSaver ]]; then
+	  do_program
 	fi
 }
 
 run_program()
 {
-	if [[ -f "$PROGRAM" ]]; then
-	  $PROGRAM run
+	if [[ -f "$DELTA" ]]; then
+		$DELTA
+		msg "zman: delta" I
 	fi
 }
 

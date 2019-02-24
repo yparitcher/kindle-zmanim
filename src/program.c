@@ -16,6 +16,7 @@ Copyright (c) 2018 Y Paritcher
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include "hebrewcalendar.h"
 #include "zmanim.h"
 #include "hdateformat.h"
@@ -248,6 +249,8 @@ int main(int argc, char* argv[])
 		if(!strcmp(argv[1], "shuir")){return shuir(hebrewDate, here);}
 		else if(!strcmp(argv[1], "zman")){return zman(hebrewDate, here);}
 	}
+	unsigned int usl = 200000;
+	usleep(usl);
 	srand(time(NULL));
 	if (rand()%2) {return shuir(hebrewDate, here);}
 	else { return zman(hebrewDate, here);}

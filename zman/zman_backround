@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#####
+# Copyright (c) 2019 Y Paritcher
+#####
+
 PROGRAM=/mnt/us/zman/zman.sh
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8

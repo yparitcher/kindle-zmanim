@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#####
+# Copyright (c) 2019 Y Paritcher
+#####
+
 convert -density 167 -depth 8 -size 600x50 canvas:lightgrey -fill black  -font ../ezra.ttf -pointsize 12 -gravity NorthEast -annotate +30+10 'ה\"ב'  -stroke black -strokewidth 6 -draw "line 0,50 600,50" 000.png
 convert -density 167 -depth 8 -size 600x75 canvas:lightgrey  -stroke black -strokewidth 6 -draw "line 0,75 600,75" 010.png
 convert -density 167 -depth 8 -size 600x75 canvas:lightgrey -fill black  -font ../ezra.ttf -pointsize 18 -gravity East -annotate +30+0 'רחשה תולע' -stroke black -strokewidth 6 -draw "line 0,75 600,75" 030.png

@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#####
+# Copyright (c) 2019 Y Paritcher
+#####
+
 _FUNCTIONS=/etc/rc.d/functions
 [ -f ${_FUNCTIONS} ] && . ${_FUNCTIONS}
 WORKDIR=/mnt/us/zman

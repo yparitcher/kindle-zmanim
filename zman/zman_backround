@@ -7,31 +7,30 @@
 _FUNCTIONS=/etc/rc.d/functions
 [ -f ${_FUNCTIONS} ] && . ${_FUNCTIONS}
 WORKDIR=/mnt/us/zman
-PROGRAM=$WORKDIR/program
-DELTA=$WORKDIR/delta
+KZMAN=$WORKDIR/kzman
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 
-do_program()
+do_zman()
 {
-	if [[ -f "$PROGRAM" ]]; then
-		$PROGRAM
+	if [[ -f "$KZMAN" ]]; then
+		$KZMAN
 		msg "zman: new picture" I
 	fi
 }
 
-wake_program()
+wake_zman()
 {
-	if [[ $(lipc-get-prop com.lab126.powerd state) == screenSaver ]]; then
-	  do_program
+	if is_PowerD_Sleeping; then
+	  do_zman
 	fi
 }
 
-run_program()
+run_zman()
 {
-	if [[ -f "$DELTA" ]]; then
-		$DELTA
+	if [[ -f "$KZMAN" ]]; then
+		$KZMAN delta
 		msg "zman: delta" I
 	fi
 }
@@ -39,11 +38,11 @@ run_program()
 lipc-wait-event -m com.lab126.powerd goingToScreenSaver,resuming,readyToSuspend | while read event; do
 	case "$event" in
 		goingToScreenSaver*)
-			do_program;;
+			do_zman;;
 		resuming*)
-			wake_program;;
+			wake_zman;;
 		readyToSuspend*)
-			run_program;;
+			run_zman;;
 	esac
 done;
 

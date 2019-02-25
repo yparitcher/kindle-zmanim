@@ -9,7 +9,7 @@ RANLIB=ranlib
 CFLAGS=-Wall -Wextra -O2 -std=gnu99 -pedantic $(INC_DIR:%=-I%)
 
 VPATH = src
-LIBS=:libzmanim.a fbink m
+LIBS=:libzmanim.a fbink m lipc
 INC_DIR = libzmanim/include FBInk include
 LIBDIR=libzmanim/lib FBInk/Release
 LDFLAGS=$(LIBDIR:%=-L%)
@@ -19,7 +19,7 @@ LDLIBS=$(LIBS:%=-l%)
 TARGETLIBZMANIM= all
 TARGETFBINK= linux
 
-default: submodules program delta
+default: submodules kzman
 
 
 submodules: libzmanim FBInk
@@ -32,12 +32,11 @@ FBInk:
 
 clean:
 	$(MAKE) submodules TARGETLIBZMANIM=cleaner TARGETFBINK=clean
-	rm program delta
+	rm kzman
 
 kindle:
 	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
-	$(MAKE) program CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD
-	$(MAKE) delta CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD LIBS="$(LIBS) lipc"
-	$(PREFIX)strip program delta
-	mv -f -t ./zman/ program delta
+	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD
+	$(PREFIX)strip kzman
+	mv -f -t ./zman/ kzman
 

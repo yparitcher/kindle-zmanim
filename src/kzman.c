@@ -7,9 +7,9 @@ Copyright (c) 2018 Y Paritcher
 #define BASEPATH "/mnt/us/zman/base.png"
 #define BGPSHPATH "/mnt/us/zman/bgpicshuir.png"
 #else
-#define FONTPATH "ezra.ttf"
-#define BASEPATH "base.png"
-#define BGPSHPATH "bgpicshuir.png"
+#define FONTPATH "zman/ezra.ttf"
+#define BASEPATH "zman/base.png"
+#define BGPSHPATH "zman/bgpicshuir.png"
 #endif
 
 #include <stdlib.h>
@@ -22,6 +22,7 @@ Copyright (c) 2018 Y Paritcher
 #include "hdateformat.h"
 #include "shuir.h"
 #include "fbink.h"
+#include "openlipc.h"
 
 int fontsize = 30;
 int spacing = 13;
@@ -235,6 +236,36 @@ fontconf7.margins.top += 150;
 	return 0;
 }
 
+int delta(hdate date, location place)
+{
+	int delta;
+	hdate next = getalosbaalhatanya(date, place);
+	if 	(hdatecompare(date, next) != 1)
+	{
+		next = getnightfall(date, place);
+		if 	(hdatecompare(date, next) != 1)
+		{
+			hdate tomorrow = date;
+			hdateaddday(&tomorrow, 1);
+			next = getalosbaalhatanya(tomorrow, place);
+		}
+	}
+	delta = hdatetime_t(next) - hdatetime_t(date);
+	delta += 45;
+
+#ifdef KINDLEBUILD
+	LIPC *lipc;
+	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}
+	LIPCcode ret = LIPC_OK;
+	ret = LipcSetIntProperty(lipc, "com.lab126.powerd", "rtcWakeup", delta);
+	LipcClose(lipc);
+	printf("%d\n", ret);
+#endif
+
+	printf("%d", delta);
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
@@ -244,14 +275,21 @@ int main(int argc, char* argv[])
 	hebrewDate.offset=pltm->tm_gmtoff;
 	setEY(&hebrewDate, 0);
 
+	const char *caller = strrchr(argv[0], '/');
+	if (caller == NULL){caller = argv[0];}
+    else {caller++;}
+	if (!strcmp(caller, "delta")){return delta(hebrewDate, here);}
+	else if(!strcmp(caller, "shuir")){return shuir(hebrewDate, here);}
+	else if(!strcmp(caller, "zman")){return zman(hebrewDate, here);}
 	if (argc > 1)
 	{
-		if(!strcmp(argv[1], "shuir")){return shuir(hebrewDate, here);}
+		if (!strcmp(argv[1], "delta")){return delta(hebrewDate, here);}
+		else if(!strcmp(argv[1], "shuir")){return shuir(hebrewDate, here);}
 		else if(!strcmp(argv[1], "zman")){return zman(hebrewDate, here);}
 	}
+
 	unsigned int usl = 200000;
 	usleep(usl);
-	srand(time(NULL));
-	if (rand()%2) {return shuir(hebrewDate, here);}
+	if (time(NULL)%2) {return shuir(hebrewDate, here);}
 	else { return zman(hebrewDate, here);}
 }

@@ -12,12 +12,14 @@ KZMAND=/usr/local/bin/zman_backround
 
 start()
 {
-	${KZMAND} &
+	msg "starting zman" I
+	$STARTSTOPD -q -x $KZMAND -S -b
 }
 
 stop()
 {
-	echo not implemented
+	msg "stopping zman" I
+	pkill -x -f "lipc-wait-event -m com.lab126.powerd goingToScreenSaver resuming readyToSuspend"
 }
 
 case "$1" in
@@ -32,6 +34,7 @@ case "$1" in
 	
 	restart)
 		stop
+		start
 		;;
 	
 	status)

@@ -4,9 +4,9 @@
 
 program to display zmanim as a screensaver for kindle 4 (K4NT).
 
-program.c executes it.
+kzman executes it.
 
-delta.c set the rtc to wakeup and refresh the screensaver on day change.
+ran with argument delta sets the rtc to wakeup and refresh the screensaver on day change.
 
 the scripts in ./utils/ create the backround pictures.
 

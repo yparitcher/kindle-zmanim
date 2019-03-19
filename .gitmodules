@@ -4,3 +4,6 @@
 [submodule "FBInk"]
 	path = FBInk
 	url = https://github.com/NiLuJe/FBInk.git
+[submodule "ini"]
+	path = ini
+	url = https://github.com/rxi/ini.git

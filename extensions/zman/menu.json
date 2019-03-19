@@ -1,0 +1,23 @@
+{
+	"comment001": "Zman",
+	"comment002": "",
+	"comment003": "",
+	"comment004": "",
+	"items": [
+	{
+		"name": "Zman",
+		"priority": 0,
+		"items": [
+		{
+			"name": "Refresh List",
+			"exitmenu": false,
+			"date": false,
+			"checked": true,
+			"refresh": true,
+			"action": "./bin/refresh.sh",
+			"params": "refresh"
+		}
+		]
+	}
+	]
+}

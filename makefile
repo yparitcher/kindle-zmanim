@@ -8,9 +8,10 @@ AR=ar
 RANLIB=ranlib
 CFLAGS=-Wall -Wextra -O2 -std=gnu99 -pedantic $(INC_DIR:%=-I%)
 
-VPATH = src
+INI_DIR = ini/src
+VPATH = src $(INI_DIR)
 LIBS=:libzmanim.a fbink m lipc
-INC_DIR = libzmanim/include FBInk include
+INC_DIR = libzmanim/include FBInk $(INI_DIR) include
 LIBDIR=libzmanim/lib FBInk/Release
 LDFLAGS=$(LIBDIR:%=-L%)
 LDLIBS=$(LIBS:%=-l%)
@@ -21,6 +22,7 @@ TARGETFBINK= linux
 
 default: submodules kzman
 
+kzman: kzman.o ini.o
 
 submodules: libzmanim FBInk
 
@@ -32,7 +34,7 @@ FBInk:
 
 clean:
 	$(MAKE) submodules TARGETLIBZMANIM=cleaner TARGETFBINK=clean
-	rm kzman
+	rm -f kzman kzman.o ini.o
 
 kindle:
 	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi

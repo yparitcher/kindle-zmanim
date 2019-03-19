@@ -6,10 +6,12 @@ Copyright (c) 2018 Y Paritcher
 #define FONTPATH "/mnt/us/zman/ezra.ttf"
 #define BASEPATH "/mnt/us/zman/base.png"
 #define BGPSHPATH "/mnt/us/zman/bgpicshuir.png"
+#define CONFFILE "/mnt/us/zman/zman.conf"
 #else
 #define FONTPATH "zman/ezra.ttf"
 #define BASEPATH "zman/base.png"
 #define BGPSHPATH "zman/bgpicshuir.png"
+#define CONFFILE "zman/zman.conf"
 #endif
 
 #include <stdlib.h>
@@ -23,6 +25,7 @@ Copyright (c) 2018 Y Paritcher
 #include "shuir.h"
 #include "fbink.h"
 #include "openlipc.h"
+#include "ini.h"
 
 int fontsize = 30;
 int spacing = 13;
@@ -269,10 +272,25 @@ int delta(hdate date, location place)
 int main(int argc, char* argv[])
 {
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
+
+	ini_t *config = ini_load(CONFFILE);
+	if (config)
+	{
+		ini_sget(config, NULL, "latitude", "%lf", &here.latitude);
+		ini_sget(config, NULL, "longitude", "%lf", &here.longitude);
+		ini_sget(config, NULL, "elevation", "%lf", &here.elevation);
+		const char *timez = ini_get(config, NULL, "timezone");
+		if (timez)
+		{
+			setenv("TZ", timez, 1);
+		}
+	ini_free(config);
+	}
+
 	time_t now = time(NULL);
 	struct tm *pltm = localtime(&now);
 	hdate hebrewDate = convertDate(*pltm);
-	hebrewDate.offset=pltm->tm_gmtoff;
+	hebrewDate.offset = pltm->tm_gmtoff;
 	setEY(&hebrewDate, 0);
 
 	const char *caller = strrchr(argv[0], '/');
@@ -288,7 +306,7 @@ int main(int argc, char* argv[])
 		else if(!strcmp(argv[1], "zman")){return zman(hebrewDate, here);}
 	}
 
-	unsigned int usl = 200000;
+	unsigned int usl = 300000;
 	usleep(usl);
 	if (time(NULL)%2) {return shuir(hebrewDate, here);}
 	else { return zman(hebrewDate, here);}

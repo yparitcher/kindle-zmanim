@@ -269,10 +269,30 @@ int delta(hdate date, location place)
 	return 0;
 }
 
+unsigned int context(int argc, char* argv[])
+{
+	const char *caller = strrchr(argv[0], '/');
+	if (caller == NULL){caller = argv[0];}
+    else {caller++;}
+	if (!strcmp(caller, "delta")){return 3;}
+	else if(!strcmp(caller, "shuir")){return 2;}
+	else if(!strcmp(caller, "zman")){return 1;}
+	if (argc > 1)
+	{
+		if (!strcmp(argv[1], "delta")){return 3;}
+		else if(!strcmp(argv[1], "shuir")){return 2;}
+		else if(!strcmp(argv[1], "zman")){return 1;}
+	}
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {
-	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
+	unsigned int usl = 300000;
+	usleep(usl);
 
+	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
+	unsigned int state = context(argc, argv);
 	ini_t *config = ini_load(CONFFILE);
 	if (config)
 	{
@@ -284,6 +304,16 @@ int main(int argc, char* argv[])
 		{
 			setenv("TZ", timez, 1);
 		}
+		if (!state)
+		{
+			const char *program = ini_get(config, NULL, "program");
+			if(program)
+			{
+				if (!strcmp(program, "delta")){state = 3;}
+				if (!strcmp(program, "shuir")){state = 2;}
+				if (!strcmp(program, "zman")){state = 1;}
+			}
+		}
 	ini_free(config);
 	}
 
@@ -293,21 +323,14 @@ int main(int argc, char* argv[])
 	hebrewDate.offset = pltm->tm_gmtoff;
 	setEY(&hebrewDate, 0);
 
-	const char *caller = strrchr(argv[0], '/');
-	if (caller == NULL){caller = argv[0];}
-    else {caller++;}
-	if (!strcmp(caller, "delta")){return delta(hebrewDate, here);}
-	else if(!strcmp(caller, "shuir")){return shuir(hebrewDate, here);}
-	else if(!strcmp(caller, "zman")){return zman(hebrewDate, here);}
-	if (argc > 1)
+	if (!state) {state = (now%2)+1;}
+	switch(state)
 	{
-		if (!strcmp(argv[1], "delta")){return delta(hebrewDate, here);}
-		else if(!strcmp(argv[1], "shuir")){return shuir(hebrewDate, here);}
-		else if(!strcmp(argv[1], "zman")){return zman(hebrewDate, here);}
+		case 3:
+			return delta(hebrewDate, here);
+		case 2:
+			return shuir(hebrewDate, here);
+		case 1:
+			return zman(hebrewDate, here);
 	}
-
-	unsigned int usl = 300000;
-	usleep(usl);
-	if (time(NULL)%2) {return shuir(hebrewDate, here);}
-	else { return zman(hebrewDate, here);}
 }

@@ -68,16 +68,27 @@ void reverse_string( char *string )
     reverse( string, end-1 );
 }
 
-const char* parshahday(hdate date)
+char* parshahday(hdate date)
 {
-	if (date.wday == 7)
+	static char parsha[50]={'\0'};
+	hdate shabbos = date;
+	if (getyomtov(date))
 	{
-		return parshahformat(getparshah(date));
+		strncat(parsha, yomtovformat(getyomtov(date)), strlen(yomtovformat(getyomtov(date))));
 	} else {
-		hdate shabbos = date;
-		hdateaddday(&shabbos, (7-shabbos.wday));
-		return parshahformat(getparshah(shabbos));
+		if (date.wday != 0)
+		{
+			hdateaddday(&shabbos, (7-shabbos.wday));
+		}
+		if (getparshah(shabbos)) {
+			strncat(parsha, "פרשת ", strlen("פרשת "));
+			strncat(parsha, parshahformat(getparshah(shabbos)), strlen(parshahformat(getparshah(shabbos))));
+		} else {
+			strncat(parsha, "שבוע של ", strlen("שבוע של "));
+			strncat(parsha, yomtovformat(getyomtov(shabbos)), strlen(yomtovformat(getyomtov(shabbos))));
+		}
 	}
+	return parsha;
 }
 
 hdate getnightfall(hdate date, location here)
@@ -114,11 +125,10 @@ int zman(hdate date, location place)
 	reverse_string(kzman0);
 	topstart = fbink_print_ot(FBFD_AUTO, kzman0, &fontconf7, &config6)+spacing;
 
-	char parsha[50]={'\0'};
-	strncat(parsha, parshahday(hebrewDate), strlen(parshahday(hebrewDate)));
+	char* parsha = parshahday(hebrewDate);
 	reverse_string(parsha);
 	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
-	topstart = fbink_printf(FBFD_AUTO, &fontconf20, &config6, "%s %s", parsha, "תשרפ")+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, parsha, &fontconf20, &config6)+spacing;
 	
 	FBInkConfig config3 = {.is_quiet=1, .halign=EDGE, .bg_color=BG_GRAYD};
 	fbink_init(FBFD_AUTO, &config3);

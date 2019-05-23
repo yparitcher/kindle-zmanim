@@ -302,6 +302,7 @@ int main(int argc, char* argv[])
 	usleep(usl);
 
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
+	_Bool EY = 0;
 	unsigned int state = context(argc, argv);
 	ini_t *config = ini_load(CONFFILE);
 	if (config)
@@ -309,6 +310,7 @@ int main(int argc, char* argv[])
 		ini_sget(config, NULL, "latitude", "%lf", &here.latitude);
 		ini_sget(config, NULL, "longitude", "%lf", &here.longitude);
 		ini_sget(config, NULL, "elevation", "%lf", &here.elevation);
+		ini_sget(config, NULL, "EY", "%d", &EY);
 		const char *timez = ini_get(config, NULL, "timezone");
 		if (timez)
 		{
@@ -331,7 +333,7 @@ int main(int argc, char* argv[])
 	struct tm *pltm = localtime(&now);
 	hdate hebrewDate = convertDate(*pltm);
 	hebrewDate.offset = pltm->tm_gmtoff;
-	setEY(&hebrewDate, 0);
+	setEY(&hebrewDate, EY);
 
 	if (!state) {state = (now%2)+1;}
 	switch(state)

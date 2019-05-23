@@ -81,10 +81,10 @@ char* parshahday(hdate date)
 			hdateaddday(&shabbos, (7-shabbos.wday));
 		}
 		if (getparshah(shabbos)) {
-			strncat(parsha, "פרשת ", strlen("פרשת "));
+			strcat(parsha, "פרשת ");
 			strncat(parsha, parshahformat(getparshah(shabbos)), strlen(parshahformat(getparshah(shabbos))));
 		} else {
-			strncat(parsha, "שבוע של ", strlen("שבוע של "));
+			strcat(parsha, "שבוע של ");
 			strncat(parsha, yomtovformat(getyomtov(shabbos)), strlen(yomtovformat(getyomtov(shabbos))));
 		}
 	}
@@ -117,9 +117,9 @@ int zman(hdate date, location place)
 	if (hdatecompare(hebrewDate, night) < 0)
 	{
 		hdateaddday(&hebrewDate, 1);
-		strncat(kzman0, "ליל ", strlen("ליל "));
+		strcat(kzman0, "ליל ");
 	}else if (hdatecompare(hebrewDate, getalosbaalhatanya(hebrewDate, here)) > 0){
-		strncat(kzman0, "ליל ", strlen("ליל "));
+		strcat(kzman0, "ליל ");
 	}
 	strncat(kzman0, hdateformat(hebrewDate), strlen(hdateformat(hebrewDate)));
 	reverse_string(kzman0);
@@ -191,9 +191,9 @@ int shuir(hdate date, location place)
 	if (hdatecompare(hebrewDate, night) < 0)
 	{
 		hdateaddday(&hebrewDate, 1);
-		strncat(kzman0, "ליל ", strlen("ליל "));
+		strcat(kzman0, "ליל ");
 	}else if (hdatecompare(hebrewDate, getalosbaalhatanya(hebrewDate, here)) > 0){
-		strncat(kzman0, "ליל ", strlen("ליל "));
+		strcat(kzman0, "ליל ");
 	}
 	strncat(kzman0, hdateformat(hebrewDate), strlen(hdateformat(hebrewDate)));
 	reverse_string(kzman0);

@@ -10,13 +10,19 @@ WORKDIR=/mnt/us/zman
 KZMAN=$WORKDIR/kzman
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-
+kzmanarg="zman"
 
 do_zman()
 {
 	if [[ -f "$KZMAN" ]]; then
-		$KZMAN
-		msg "zman: new picture" I
+		$KZMAN "$kzmanarg"
+		msg "zman: $kzmanarg new picture" I
+		case "$kzmanarg" in
+			zman)
+				kzmanarg="shuir";;
+			shuir)
+				kzmanarg="zman";;
+		esac
 	fi
 }
 

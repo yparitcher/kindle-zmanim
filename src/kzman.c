@@ -123,49 +123,49 @@ int zman(hdate date, location place)
 	}
 	strncat(kzman0, hdateformat(hebrewDate), strlen(hdateformat(hebrewDate)));
 	reverse_string(kzman0);
-	topstart = fbink_print_ot(FBFD_AUTO, kzman0, &fontconf7, &config6)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, kzman0, &fontconf7, &config6, NULL)+spacing;
 
 	char* parsha = parshahday(hebrewDate);
 	reverse_string(parsha);
 	FBInkOTConfig fontconf20 = {.margins={.top=125,.right=0}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, parsha, &fontconf20, &config6)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, parsha, &fontconf20, &config6, NULL)+spacing;
 	
 	FBInkConfig config3 = {.is_quiet=1, .halign=EDGE, .bg_color=BG_GRAYD};
 	fbink_init(FBFD_AUTO, &config3);
 	
 //	FBInkOTConfig fontconf1 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "רחשה תולע", &fontconf1, &config3);
+//	fbink_print_ot(FBFD_AUTO, "רחשה תולע", &fontconf1, &config3, NULL);
 	FBInkOTConfig fontconf4 = {.margins={.top=200, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getalosbaalhatanya(hebrewDate, here)), &fontconf4, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getalosbaalhatanya(hebrewDate, here)), &fontconf4, &config3, NULL)+spacing;
 //	FBInkOTConfig fontconf5 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "ריכישמ", &fontconf5, &config3);
+//	fbink_print_ot(FBFD_AUTO, "ריכישמ", &fontconf5, &config3, NULL);
 	FBInkOTConfig fontconf6 = {.margins={.top=275, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getmisheyakir10p2degrees(hebrewDate, here)), &fontconf6, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getmisheyakir10p2degrees(hebrewDate, here)), &fontconf6, &config3, NULL)+spacing;
 //	FBInkOTConfig fontconf8 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "המחה ץנ", &fontconf8, &config3);
+//	fbink_print_ot(FBFD_AUTO, "המחה ץנ", &fontconf8, &config3, NULL);
 	FBInkOTConfig fontconf9 = {.margins={.top=350, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getsunrise(hebrewDate, here)), &fontconf9, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getsunrise(hebrewDate, here)), &fontconf9, &config3, NULL)+spacing;
 //	FBInkOTConfig fontconf10 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "עמש תאירק", &fontconf10, &config3);
+//	fbink_print_ot(FBFD_AUTO, "עמש תאירק", &fontconf10, &config3, NULL);
 	FBInkOTConfig fontconf11 = {.margins={.top=425, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getshmabaalhatanya(hebrewDate, here)), &fontconf11, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getshmabaalhatanya(hebrewDate, here)), &fontconf11, &config3, NULL)+spacing;
 //	FBInkOTConfig fontconf12 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "תוצח", &fontconf12, &config3);
+//	fbink_print_ot(FBFD_AUTO, "תוצח", &fontconf12, &config3, NULL);
 	FBInkOTConfig fontconf13 = {.margins={.top=500, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getchatzosbaalhatanya(hebrewDate, here)), &fontconf13, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getchatzosbaalhatanya(hebrewDate, here)), &fontconf13, &config3, NULL)+spacing;
 //	FBInkOTConfig fontconf14 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "הלודג החנמ", &fontconf14, &config3);
+//	fbink_print_ot(FBFD_AUTO, "הלודג החנמ", &fontconf14, &config3, NULL);
 	FBInkOTConfig fontconf15 = {.margins={.top=575, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getminchagedolabaalhatanya(hebrewDate, here)), &fontconf15, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getminchagedolabaalhatanya(hebrewDate, here)), &fontconf15, &config3, NULL)+spacing;
 //	if (ltm.tm_wday == 5) printf("candle lighting: %s\n", formattime(getcandlelighting(hebrewDate, here)));
 //	FBInkOTConfig fontconf16 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "העיקש", &fontconf16, &config3);
+//	fbink_print_ot(FBFD_AUTO, "העיקש", &fontconf16, &config3, NULL);
 	FBInkOTConfig fontconf17 = {.margins={.top=650, .right=leftcol}, .size_pt=fontsize};
-	topstart = fbink_print_ot(FBFD_AUTO, formattime(getsunset(hebrewDate, here)), &fontconf17, &config3)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, formattime(getsunset(hebrewDate, here)), &fontconf17, &config3, NULL)+spacing;
 //	FBInkOTConfig fontconf18 = {.margins={.top=topstart, .right=rightcol}, .size_pt=fontsize};
-//	fbink_print_ot(FBFD_AUTO, "םיבכוכה תאצ", &fontconf18, &config3);
+//	fbink_print_ot(FBFD_AUTO, "םיבכוכה תאצ", &fontconf18, &config3, NULL);
 	FBInkOTConfig fontconf19 = {.margins={.top=725, .right=leftcol}, .size_pt=fontsize};
-	fbink_print_ot(FBFD_AUTO, formattime(getnightfall(hebrewDate, here)), &fontconf19, &config3);
+	fbink_print_ot(FBFD_AUTO, formattime(getnightfall(hebrewDate, here)), &fontconf19, &config3, NULL);
 
 
 	fbink_free_ot_fonts();
@@ -197,7 +197,7 @@ int shuir(hdate date, location place)
 	}
 	strncat(kzman0, hdateformat(hebrewDate), strlen(hdateformat(hebrewDate)));
 	reverse_string(kzman0);
-	topstart = fbink_print_ot(FBFD_AUTO, kzman0, &fontconf7, &config6)+spacing;
+	topstart = fbink_print_ot(FBFD_AUTO, kzman0, &fontconf7, &config6, NULL)+spacing;
 	fontconf7.margins.top += 75;
 
 	char chumashbuf[100]={'\0'};

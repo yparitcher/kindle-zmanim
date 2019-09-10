@@ -3,6 +3,7 @@
 #####
 
 PREFIX=$$HOME/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-
+PREFIXKT4=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi-
 CC=gcc
 AR=ar
 RANLIB=ranlib
@@ -40,5 +41,11 @@ kindle:
 	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
 	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD LIBS="$(LIBS) lipc"
 	$(PREFIX)strip kzman
+	mv -f -t ./zman/ kzman
+
+KT4:
+	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=kindle CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
+	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)ar RANLIB=$(PREFIXKT4)ranlib CPPFLAGS+=-DKINDLEBUILD LIBS="$(LIBS) lipc"
+	$(PREFIXKT4)strip kzman
 	mv -f -t ./zman/ kzman
 

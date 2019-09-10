@@ -35,7 +35,4 @@
 			"action": "./bin/refresh.sh",
 			"params": "refresh"
 		}
-		]
-	}
-	]
-}
+

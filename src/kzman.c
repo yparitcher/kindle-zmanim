@@ -266,8 +266,7 @@ unsigned int context(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-	unsigned int usl = 300000;
-	usleep(usl);
+	unsigned int usl = 30;
 
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
 	_Bool EY = 0;
@@ -279,6 +278,7 @@ int main(int argc, char* argv[])
 		ini_sget(config, NULL, "longitude", "%lf", &here.longitude);
 		ini_sget(config, NULL, "elevation", "%lf", &here.elevation);
 		ini_sget(config, NULL, "EY", "%d", &EY);
+		ini_sget(config, NULL, "delay", "%u", &EY);
 		const char *timez = ini_get(config, NULL, "timezone");
 		if (timez)
 		{
@@ -296,6 +296,9 @@ int main(int argc, char* argv[])
 		}
 	ini_free(config);
 	}
+
+	usl *= 10000;
+	usleep(usl);
 
 	time_t now = time(NULL);
 	struct tm *pltm = localtime(&now);

@@ -4,8 +4,6 @@
 # Copyright (c) 2019 Y Paritcher
 #####
 
-_FUNCTIONS=/etc/rc.d/functions
-[ -f ${_FUNCTIONS} ] && . ${_FUNCTIONS}
 WORKDIR=/mnt/us/zman
 KZMAN=$WORKDIR/kzman
 export LANG=en_US.UTF-8
@@ -16,7 +14,7 @@ do_zman()
 {
 	if [[ -f "$KZMAN" ]]; then
 		$KZMAN "$kzmanarg"
-		msg "zman: $kzmanarg new picture" I
+		logger -t "kzman[$$]" -p local4.info "I $kzmanarg: new picture"
 		case "$kzmanarg" in
 			zman)
 				kzmanarg="shuir";;
@@ -28,7 +26,10 @@ do_zman()
 
 wake_zman()
 {
-	if is_PowerD_Sleeping; then
+	logger -t "kzman[$$]" -p local4.info "I wakeup run"
+	POWERD_STATES=`lipc-get-prop -s com.lab126.powerd state`
+	logger -t "kzman[$$]" -p local4.info "I PowerD state: $POWERD_STATES"
+	if [ "$POWERD_STATES" == "screenSaver" ] || [ "POWERD_STATES" == "suspended" ] ; then
 	  do_zman
 	fi
 }
@@ -37,15 +38,15 @@ run_zman()
 {
 	if [[ -f "$KZMAN" ]]; then
 		$KZMAN delta
-		msg "zman: delta" I
+		logger -t "kzman[$$]" -p local4.info "I delta"
 	fi
 }
 
-lipc-wait-event -m com.lab126.powerd goingToScreenSaver,resuming,readyToSuspend | while read event; do
+lipc-wait-event -m com.lab126.powerd goingToScreenSaver,wakeupFromSuspend,readyToSuspend | while read event; do
 	case "$event" in
 		goingToScreenSaver*)
 			do_zman;;
-		resuming*)
+		wakeupFromSuspend*)
 			wake_zman;;
 		readyToSuspend*)
 			run_zman;;

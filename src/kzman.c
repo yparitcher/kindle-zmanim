@@ -33,6 +33,7 @@ Copyright (c) 2018 Y Paritcher
 const FBInkConfig configBG = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .bg_color=BG_GRAYD};
 const FBInkConfig configCT = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .is_bgless=1, .is_centered=1};
 const FBInkConfig configLT = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .is_bgless=1};
+const FBInkConfig configCS = {.is_quiet=1, .no_refresh=1};
 const FBInkConfig configRF = {.is_quiet=1};
 FBInkOTConfig fontconf = {.margins={.top=50,.right=0}, .size_pt=FONTSIZE};
 
@@ -104,9 +105,9 @@ hdate getnightfall(hdate date, location here)
 int fbopen()
 {
 	int fbfd = fbink_open();
-	fbink_init(fbfd, &configRF);
+	fbink_init(fbfd, &configCS);
 	fbink_add_ot_font(FONTPATH, FNT_REGULAR);
-	fbink_cls(fbfd, &configRF);
+	fbink_cls(fbfd, &configCS);
 	return fbfd;
 }
 

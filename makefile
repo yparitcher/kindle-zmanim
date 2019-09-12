@@ -11,17 +11,17 @@ CFLAGS=-Wall -Wextra -O2 -std=gnu99 -pedantic $(INC_DIR:%=-I%)
 
 INI_DIR = ini/src
 VPATH = src $(INI_DIR)
-LIBS=:libzmanim.a fbink m
+LIBS=:libzmanim.a fbink m lipc
 INC_DIR = libzmanim/include FBInk $(INI_DIR) include
 LIBDIR=libzmanim/lib FBInk/Release
 LDFLAGS=$(LIBDIR:%=-L%)
 LDLIBS=$(LIBS:%=-l%)
 
 .PHONY: libzmanim FBInk submodules clean default kindle
-TARGETLIBZMANIM= all
-TARGETFBINK= linux
+TARGETLIBZMANIM=kindle
+TARGETFBINK=kindle
 
-default: submodules kzman
+default: KT4
 
 kzman: kzman.o ini.o
 
@@ -38,14 +38,14 @@ clean:
 	rm -f kzman kzman.o ini.o
 
 kindle:
-	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
-	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib CPPFLAGS+=-DKINDLEBUILD LIBS="$(LIBS) lipc"
+	$(MAKE) submodules TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
+	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib
 	$(PREFIX)strip kzman
 	mv -f -t ./zman/ kzman
 
 KT4:
-	$(MAKE) submodules TARGETLIBZMANIM=kindle TARGETFBINK=kindle CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
-	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)ar RANLIB=$(PREFIXKT4)ranlib CPPFLAGS+=-DKINDLEBUILD LIBS="$(LIBS) lipc"
+	$(MAKE) submodules CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
+	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)ar RANLIB=$(PREFIXKT4)ranlib
 	$(PREFIXKT4)strip kzman
 	mv -f -t ./zman/ kzman
 

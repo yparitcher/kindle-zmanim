@@ -2,23 +2,17 @@
 Copyright (c) 2018 Y Paritcher
 ****/
 
-#ifdef KINDLEBUILD
 #define FONTPATH "/mnt/us/zman/ezra.ttf"
 #define BASEPATH "/mnt/us/zman/base.png"
 #define BGPSHPATH "/mnt/us/zman/bgpicshuir.png"
 #define CONFFILE "/mnt/us/zman/zman.conf"
-#else
-#define FONTPATH "zman/ezra.ttf"
-#define BASEPATH "zman/base.png"
-#define BGPSHPATH "zman/bgpicshuir.png"
-#define CONFFILE "zman/zman.conf"
-#endif
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <syslog.h>
 #include "hebrewcalendar.h"
 #include "zmanim.h"
 #include "hdateformat.h"
@@ -27,15 +21,17 @@ Copyright (c) 2018 Y Paritcher
 #include "openlipc.h"
 #include "ini.h"
 
-#define FONTSIZE 30
-#define LEFTCOL 420
-
 const FBInkConfig configBG = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .bg_color=BG_GRAYD};
 const FBInkConfig configCT = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .is_bgless=1, .is_centered=1};
 const FBInkConfig configLT = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .is_bgless=1};
 const FBInkConfig configCS = {.is_quiet=1, .no_refresh=1};
 const FBInkConfig configRF = {.is_quiet=1};
-FBInkOTConfig fontconf = {.margins={.top=50,.right=0}, .size_pt=FONTSIZE};
+typedef struct {
+	int fbfd; _Bool EY;
+	location place;
+	FBInkDump* dump;
+} CallbackData ;
+_Bool screenswitch = 0;
 
 char* formattime(hdate date)
 {
@@ -75,6 +71,7 @@ void reverse_string( char *string )
 char* parshahday(hdate date)
 {
 	static char parsha[50]={'\0'};
+	memset(parsha, 0, sizeof parsha);
 	hdate shabbos = date;
 	if (getyomtov(date))
 	{
@@ -107,7 +104,6 @@ int fbopen()
 	int fbfd = fbink_open();
 	fbink_init(fbfd, &configCS);
 	fbink_add_ot_font(FONTPATH, FNT_REGULAR);
-	fbink_cls(fbfd, &configCS);
 	return fbfd;
 }
 
@@ -118,21 +114,22 @@ void fbclose(int fbfd)
 	fbink_close(fbfd);
 }
 
-void print_ot(int fbfd, const char* restrict string, const FBInkConfig* restrict fbink_cfg)
+void print_ot(int fbfd, const char* restrict string, FBInkOTConfig* fontconf, const FBInkConfig* restrict fbink_cfg)
 {
-	fbink_print_ot(fbfd, string, &fontconf, fbink_cfg, NULL);
-	fontconf.margins.top += 75;
+	fbink_print_ot(fbfd, string, fontconf, fbink_cfg, NULL);
+	fontconf->margins.top += 75;
 }
 
-void print_heb(int fbfd, char* string)
+void print_heb(int fbfd, char* string, FBInkOTConfig* fontconf)
 {
 	reverse_string(string);
-	print_ot(fbfd, string, &configCT);
+	print_ot(fbfd, string, fontconf, &configCT);
 }
 
-void print_shuir(int fbfd, hdate hebrewDate, int (*f)(hdate date, char* buffer), _Bool rambam)
+void print_shuir(int fbfd, FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date, char* buffer), _Bool rambam)
 {
 	char buf[100]={'\0'};
+	memset(buf, 0, sizeof buf);
 	(*f)(hebrewDate, buf);
 	char * buf2 = strchr(buf, '\n');
 	*buf2++ = '\0';
@@ -144,18 +141,19 @@ void print_shuir(int fbfd, hdate hebrewDate, int (*f)(hdate date, char* buffer),
 		memset(buf3, '\0', sizeof(char)*2);
 		buf3+=sizeof(char)*2;
 	}
-	print_heb(fbfd, buf);
-	print_heb(fbfd, buf2);
+	print_heb(fbfd, buf, fontconf);
+	print_heb(fbfd, buf2, fontconf);
 	if (buf3){
-		print_heb(fbfd, ++buf3);
+		print_heb(fbfd, ++buf3, fontconf);
 	}
 }
 
-void print_date(int fbfd, hdate* hebrewDate, location here)
+void print_date(int fbfd, FBInkOTConfig* fontconf, hdate* hebrewDate, location here)
 {
 	fbink_init(fbfd, &configCT);
 	
 	char date[50]={'\0'};
+	memset(date, 0, sizeof date);
 	hdate night = getnightfall(*hebrewDate, here);
 	if (hdatecompare(*hebrewDate, night) < 0)
 	{
@@ -165,113 +163,165 @@ void print_date(int fbfd, hdate* hebrewDate, location here)
 		strcat(date, "ליל ");
 	}
 	strncat(date, hdateformat(*hebrewDate), strlen(hdateformat(*hebrewDate)));
-	print_heb(fbfd, date);
+	print_heb(fbfd, date, fontconf);
 }
 
-int zman(hdate date, location place)
+hdate getNow(_Bool EY)
 {
-	location here = place;
-	hdate hebrewDate = date;
+	time_t now = time(NULL);
+	struct tm *pltm = localtime(&now);
+	hdate hebrewDate = convertDate(*pltm);
+	hebrewDate.offset = pltm->tm_gmtoff;
+	setEY(&hebrewDate, EY);
+	return hebrewDate;
+}
 
-	int fbfd = fbopen();
+int zman(CallbackData* callbackData)
+{
+	hdate hebrewDate = getNow(callbackData->EY);
+	location here = callbackData->place;
+
+	FBInkOTConfig fontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+	int fbfd = callbackData->fbfd;
+	fbink_cls(fbfd, &configCS);
 	fbink_init(fbfd, &configBG);
 	fbink_print_image(fbfd, BASEPATH, 0, 0, &configBG);
 
-	print_date(fbfd, &hebrewDate, here);
+	print_date(fbfd, &fontconf, &hebrewDate, here);
 
 	char* parsha = parshahday(hebrewDate);
-	print_heb(fbfd, parsha);
+	print_heb(fbfd, parsha, &fontconf);
 	
 	fbink_init(fbfd, &configLT);
-	fontconf.margins.right=LEFTCOL;
+	fontconf.margins.right=420;
 
-	print_ot(fbfd, formattime(getalosbaalhatanya(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getmisheyakir10p2degrees(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getsunrise(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getshmabaalhatanya(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getchatzosbaalhatanya(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getminchagedolabaalhatanya(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getsunset(hebrewDate, here)), &configLT);
-	print_ot(fbfd, formattime(getnightfall(hebrewDate, here)), &configLT);
+	print_ot(fbfd, formattime(getalosbaalhatanya(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getmisheyakir10p2degrees(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getsunrise(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getshmabaalhatanya(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getchatzosbaalhatanya(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getminchagedolabaalhatanya(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getsunset(hebrewDate, here)), &fontconf, &configLT);
+	print_ot(fbfd, formattime(getnightfall(hebrewDate, here)), &fontconf, &configLT);
 
-	fbclose(fbfd);
+	syslog(LOG_INFO, "zman: new picture\n");
 	return 0;
 }
 
-int shuir(hdate date, location place)
+int shuir(CallbackData* callbackData)
 {
-	location here = place;
-	hdate hebrewDate = date;
+	hdate hebrewDate = getNow(callbackData->EY);
+	location here = callbackData->place;
 
-	int fbfd = fbopen();
+	FBInkOTConfig fontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+	int fbfd = callbackData->fbfd;
+	fbink_cls(fbfd, &configCS);
 	fbink_init(fbfd, &configBG);
 	fbink_print_image(fbfd, BGPSHPATH, 0, 0, &configBG);
 
-	print_date(fbfd, &hebrewDate, here);
+	print_date(fbfd, &fontconf, &hebrewDate, here);
 
-	print_shuir(fbfd, hebrewDate, chumash, 0);
-	print_shuir(fbfd, hebrewDate, tehillim, 0);
+	print_shuir(fbfd, &fontconf, hebrewDate, chumash, 0);
+	print_shuir(fbfd, &fontconf, hebrewDate, tehillim, 0);
 fontconf.margins.top += 150;
-	print_shuir(fbfd, hebrewDate, rambam, 1);
+	print_shuir(fbfd, &fontconf, hebrewDate, rambam, 1);
 
-	fbclose(fbfd);
+	syslog(LOG_INFO, "shuir: new picture\n");
 	return 0;
 }
 
-int delta(hdate date, location place)
+int delta(LIPC *lipc, CallbackData* callbackData)
 {
+	hdate hebrewDate = getNow(callbackData->EY);
+	location here = callbackData->place;
 	int delta;
-	hdate next = getalosbaalhatanya(date, place);
-	if 	(hdatecompare(date, next) != 1)
+	hdate next = getalosbaalhatanya(hebrewDate, here);
+	if 	(hdatecompare(hebrewDate, next) != 1)
 	{
-		next = getnightfall(date, place);
-		if 	(hdatecompare(date, next) != 1)
+		next = getnightfall(hebrewDate, here);
+		if 	(hdatecompare(hebrewDate, next) != 1)
 		{
-			hdate tomorrow = date;
+			hdate tomorrow = hebrewDate;
 			hdateaddday(&tomorrow, 1);
-			next = getalosbaalhatanya(tomorrow, place);
+			next = getalosbaalhatanya(tomorrow, here);
 		}
 	}
-	delta = hdatetime_t(next) - hdatetime_t(date);
+	delta = hdatetime_t(next) - hdatetime_t(hebrewDate);
 	delta += 45;
 
-#ifdef KINDLEBUILD
-	LIPC *lipc;
-	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}
 	LIPCcode ret = LIPC_OK;
 	ret = LipcSetIntProperty(lipc, "com.lab126.powerd", "rtcWakeup", delta);
-	LipcClose(lipc);
-	printf("%d\n", ret);
-#endif
 
-	printf("%d", delta);
-	return 0;
+	syslog(LOG_INFO, "delta: %d\n", delta);
+	return ret;
 }
 
-unsigned int context(int argc, char* argv[])
+int printSS(CallbackData* callbackData)
 {
-	const char *caller = strrchr(argv[0], '/');
-	if (caller == NULL){caller = argv[0];}
-    else {caller++;}
-	if (!strcmp(caller, "delta")){return 3;}
-	else if(!strcmp(caller, "shuir")){return 2;}
-	else if(!strcmp(caller, "zman")){return 1;}
-	if (argc > 1)
+	switch (screenswitch)
 	{
-		if (!strcmp(argv[1], "delta")){return 3;}
-		else if(!strcmp(argv[1], "shuir")){return 2;}
-		else if(!strcmp(argv[1], "zman")){return 1;}
+		case 0:
+			return zman(callbackData);
+		case 1:
+			return shuir(callbackData);
 	}
 	return 0;
 }
 
-int main(int argc, char* argv[])
+LIPCcode goingToSS(CallbackData* callbackData)
 {
-	unsigned int usl = 30;
+	screenswitch = !screenswitch;
+	int err = fbink_dump(callbackData->fbfd, callbackData->dump);
+	if (err){fprintf(stderr, "SS dump: %s\n", strerror (err));}
+	return printSS(callbackData);
+}
 
+LIPCcode outOfSS(CallbackData* callbackData)
+{
+	syslog(LOG_INFO, "outOfScreenSaver\n");
+	int err = fbink_restore(callbackData->fbfd, &configRF, callbackData->dump);
+	if (err){fprintf(stderr, "SS restore: %s\n", strerror (err));}
+	fbink_free_dump_data(callbackData->dump);
+	return LIPC_OK;
+}
+
+LIPCcode wakeup(LIPC *lipc, CallbackData* callbackData)
+{
+	LIPCcode ret = LIPC_OK;
+	char* state = NULL;
+	_Bool print = 0;
+	ret = LipcGetStringProperty(lipc, "com.lab126.powerd", "state", &state);
+	if(ret){return ret;}
+	syslog(LOG_INFO, "wakeupFromSuspend state: %s\n", state);
+	if (!strcmp(state, "screenSaver") || !strcmp(state, "suspended")){print=1;}
+	LipcFreeString(state);
+	if (print) {return printSS(callbackData);}
+	return ret;
+}
+
+LIPCcode lipcCallback(LIPC *lipc, const char *name, LIPCevent *event, void *data)
+{
+	LIPCcode ret = LIPC_OK;
+	CallbackData* callbackData = (CallbackData*)data;
+	callbackData->fbfd = fbopen();
+	if (!strcmp(name, "outOfScreenSaver")){
+		ret = outOfSS(callbackData);
+	} else if (!strcmp(name, "goingToScreenSaver")){
+		ret = goingToSS(callbackData);
+	} else if (!strcmp(name, "wakeupFromSuspend")){
+		ret = wakeup(lipc, callbackData);
+	} else if (!strcmp(name, "readyToSuspend")){
+		ret = delta(lipc, callbackData);
+	}
+	fbclose(callbackData->fbfd);
+	callbackData->fbfd = 0;
+	return ret;
+}
+
+int main()
+{
 	location here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34};
 	_Bool EY = 0;
-	unsigned int state = context(argc, argv);
 	ini_t *config = ini_load(CONFFILE);
 	if (config)
 	{
@@ -279,42 +329,26 @@ int main(int argc, char* argv[])
 		ini_sget(config, NULL, "longitude", "%lf", &here.longitude);
 		ini_sget(config, NULL, "elevation", "%lf", &here.elevation);
 		ini_sget(config, NULL, "EY", "%d", &EY);
-		ini_sget(config, NULL, "delay", "%u", &EY);
 		const char *timez = ini_get(config, NULL, "timezone");
 		if (timez)
 		{
 			setenv("TZ", timez, 1);
 		}
-		if (!state)
-		{
-			const char *program = ini_get(config, NULL, "program");
-			if(program)
-			{
-				if (!strcmp(program, "delta")){state = 3;}
-				if (!strcmp(program, "shuir")){state = 2;}
-				if (!strcmp(program, "zman")){state = 1;}
-			}
-		}
-	ini_free(config);
+		ini_free(config);
 	}
 
-	usl *= 10000;
-	usleep(usl);
+	openlog(NULL, LOG_PID, LOG_DAEMON);
 
-	time_t now = time(NULL);
-	struct tm *pltm = localtime(&now);
-	hdate hebrewDate = convertDate(*pltm);
-	hebrewDate.offset = pltm->tm_gmtoff;
-	setEY(&hebrewDate, EY);
-
-	if (!state) {state = (now%2)+1;}
-	switch(state)
-	{
-		case 3:
-			return delta(hebrewDate, here);
-		case 2:
-			return shuir(hebrewDate, here);
-		case 1:
-			return zman(hebrewDate, here);
-	}
+	FBInkDump dump = {0};
+	CallbackData callbackData = {.EY=EY, .place=here, .dump=&dump};
+	LIPC *lipc;
+	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}
+	LIPCcode ret = LIPC_OK;
+	ret = LipcSubscribeExt(lipc, "com.lab126.powerd", NULL, &lipcCallback, &callbackData);
+	LipcSetStringProperty(lipc, "com.lab126.blanket" , "unload", "screensaver");
+sleep(60);
+	LipcSetStringProperty(lipc, "com.lab126.blanket" , "load", "screensaver");
+	ret = LipcUnsubscribeExt(lipc, "com.lab126.powerd", NULL, NULL);
+	LipcClose(lipc);
+	return ret;
 }

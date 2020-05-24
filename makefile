@@ -3,11 +3,11 @@
 #####
 
 PREFIX=$$HOME/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-
-PREFIXKT4=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi-
+PREFIXKT4=arm-kindlepw2-linux-gnueabi-
 CC=gcc
-AR=ar
-RANLIB=ranlib
-CFLAGS=-Wall -Wextra -O2 -std=gnu99 -pedantic $(INC_DIR:%=-I%)
+AR=gcc-ar
+RANLIB=gcc-ranlib
+CFLAGS=-Wall -Wextra -O2 -flto $(INC_DIR:%=-I%)
 
 INI_DIR = ini/src
 VPATH = src $(INI_DIR)
@@ -31,7 +31,7 @@ libzmanim:
 	cd $@ && $(MAKE) $(TARGETLIBZMANIM)
 
 FBInk:
-	cd $@ && $(MAKE) $(TARGETFBINK)
+	cd $@ && $(MAKE) $(TARGETFBINK) MINIMAL=1 IMAGE=1 OPENTYPE=1 CFLAGS=-flto
 
 clean:
 	$(MAKE) submodules TARGETLIBZMANIM=cleaner TARGETFBINK=clean
@@ -39,13 +39,14 @@ clean:
 
 kindle:
 	$(MAKE) submodules TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
-	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)ar RANLIB=$(PREFIX)ranlib
+	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)$(AR) RANLIB=$(PREFIX)$(RANLIB)
 	$(PREFIX)strip kzman
 	mv -f -t ./zman/ kzman
 
 KT4:
-	$(MAKE) submodules CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
-	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)ar RANLIB=$(PREFIXKT4)ranlib
+	$(MAKE) libzmanim CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)$(AR) RANLIB=$(PREFIXKT4)$(RANLIB)
+	$(MAKE) FBInk CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
+	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)$(AR) RANLIB=$(PREFIXKT4)$(RANLIB)
 	$(PREFIXKT4)strip kzman
 	mv -f -t ./zman/ kzman
 

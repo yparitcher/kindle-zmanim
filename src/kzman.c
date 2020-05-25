@@ -32,6 +32,7 @@ struct {
 	location here;
 } place = {.here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34}, .EY=0};
 _Bool screenswitch = 0;
+struct timespec sleeptime = {.tv_sec=5, .tv_nsec=0};
 
 void reverse( char *start, char *end )
 {
@@ -267,7 +268,10 @@ void goingToSS()
 void outOfSS()
 {
 	syslog(LOG_INFO, "outOfScreenSaver\n");
-	fbink_restore(fbfd, &configRF, &dump);
+	if (access("/var/tmp/koreader.sh" , F_OK)) {
+		syslog(LOG_INFO, "Restoring dump\n");
+		fbink_restore(fbfd, &configRF, &dump);
+	}
 	fbink_free_dump_data(&dump);
 }
 
@@ -279,16 +283,24 @@ LIPCcode wakeup(LIPC *lipc, LIPCevent *event)
 	ret = LipcGetStringProperty(lipc, "com.lab126.powerd", "state", &state);
 	if(ret){return ret;}
 	syslog(LOG_INFO, "wakeupFromSuspend state: %s\n", state);
-	if (!strcmp(state, "screenSaver") || !strcmp(state, "suspended")){print=1;}
+	if (!strcmp(state, "screenSaver") || !strcmp(state, "suspended"))
+	{
+		LipcFreeString(state);
+		state = NULL;
+		nanosleep(&sleeptime, NULL);
+		ret = LipcGetStringProperty(lipc, "com.lab126.powerd", "state", &state);
+		syslog(LOG_INFO, "wakeupFromSuspend state wait: %s\n", state);
+		if (!strcmp(state, "screenSaver") || !strcmp(state, "suspended")){print=1;}
+	}
 	LipcFreeString(state);
 //**********
-syslog(LOG_WARNING, "Name: %s\n", LipcGetEventName(event));
-int intparam = 0;
-char* stringparam = NULL;
-LipcGetIntParam(event, &intparam);
-LipcGetStringParam(event, &stringparam);
-syslog(LOG_WARNING, "Int: %d\n", intparam);
-syslog(LOG_WARNING, "String: %s\n", stringparam);
+//syslog(LOG_WARNING, "Name: %s\n", LipcGetEventName(event));
+//int intparam = 0;
+//char* stringparam = NULL;
+//LipcGetIntParam(event, &intparam);
+//LipcGetStringParam(event, &stringparam);
+//syslog(LOG_WARNING, "Int: %d\n", intparam);
+//syslog(LOG_WARNING, "String: %s\n", stringparam);
 //**********
 	if (print) {printSS();}
 	return ret;
@@ -347,11 +359,11 @@ int main()
 	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}
 	LIPCcode ret = LIPC_OK;
 	ret = LipcSubscribeExt(lipc, "com.lab126.powerd", NULL, &lipcCallback, NULL);
-//	ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "unload", "screensaver");
+	ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "unload", "screensaver");
 
 	sigwait(&set, &sig);
 
-//	ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "load", "screensaver");
+	ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "load", "screensaver");
 	ret += LipcUnsubscribeExt(lipc, "com.lab126.powerd", NULL, NULL);
 	LipcClose(lipc);
 	fbink_free_ot_fonts();

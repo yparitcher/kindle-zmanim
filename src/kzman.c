@@ -32,7 +32,7 @@ struct {
 	location here;
 } place = {.here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34}, .EY=0};
 _Bool screenswitch = 0;
-struct timespec sleeptime = {.tv_sec=5, .tv_nsec=0};
+struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 
 void reverse( char *start, char *end )
 {

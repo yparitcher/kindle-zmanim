@@ -386,7 +386,7 @@ int main()
 	fbink_init(fbfd, &configCT);
 	FBInkState fbink_state;
 	fbink_get_state(&configCT, &fbink_state);
-	if ((ret = setScreenSize(fbink_state.screen_width, fbink_state.screen_height)) != 0) {
+	if ((ret = setScreenSize(fbink_state.screen_width, fbink_state.screen_height)) == 0) {
 		fbink_add_ot_font(FONTPATH, FNT_REGULAR);
 		LIPC *lipc;
 		if ((lipc = LipcOpenNoName()) != NULL)
@@ -399,7 +399,10 @@ int main()
 			ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "load", "screensaver");
 			ret += LipcUnsubscribeExt(lipc, "com.lab126.powerd", NULL, NULL);
 			LipcClose(lipc);
-		} else {ret = 1;}
+		} else {
+			syslog(LOG_INFO, "Unable to open LIPC\n");
+			ret = 1;
+		}
 		fbink_free_ot_fonts();
 	}
 	fbink_close(fbfd);

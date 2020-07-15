@@ -34,6 +34,14 @@ struct {
 _Bool screenswitch = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 
+//screen size dependent
+int linespace = 75;
+int rightzmanmargin = 420;
+int skiptanya = 150;
+FBInkOTConfig basefontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+const char* zmanbg = BASEPATH;
+const char* shuirbg = BGPSHPATH;
+
 void reverse( char *start, char *end )
 {
     while( start < end )
@@ -69,7 +77,7 @@ hdate getnightfall(hdate date, location here)
 void print_ot(const char* restrict string, FBInkOTConfig* fontconf, const FBInkConfig* restrict fbink_cfg)
 {
 	fbink_print_ot(fbfd, string, fontconf, fbink_cfg, NULL);
-	fontconf->margins.top += 75;
+	fontconf->margins.top += linespace;
 }
 
 void print_heb(char* string, FBInkOTConfig* fontconf)
@@ -173,15 +181,15 @@ void zman()
 	hdate hebrewDate = getNow(EY);
 
 	fbink_init(fbfd, &configCT);
-	FBInkOTConfig fontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+	FBInkOTConfig fontconf = basefontconf;
 	fbink_cls(fbfd, &configCT, NULL);
-	fbink_print_image(fbfd, BASEPATH, 0, 0, &configCT);
+	fbink_print_image(fbfd, zmanbg, 0, 0, &configCT);
 
 	print_date(&fontconf, &hebrewDate, here);
 	print_parshah(&fontconf, hebrewDate);
 	
 	fbink_init(fbfd, &configLT);
-	fontconf.margins.right=420;
+	fontconf.margins.right = rightzmanmargin;
 
 	print_time(getalosbaalhatanya(hebrewDate, here), &fontconf);
 	print_time(getmisheyakir10p2degrees(hebrewDate, here), &fontconf);
@@ -202,16 +210,16 @@ void shuir()
 	_Bool EY = place.EY;
 	hdate hebrewDate = getNow(EY);
 
-	FBInkOTConfig fontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+	FBInkOTConfig fontconf = basefontconf;
 	fbink_init(fbfd, &configCT);
 	fbink_cls(fbfd, &configCT, NULL);
-	fbink_print_image(fbfd, BGPSHPATH, 0, 0, &configCT);
+	fbink_print_image(fbfd, shuirbg, 0, 0, &configCT);
 
 	print_date(&fontconf, &hebrewDate, here);
 
 	print_shuir(&fontconf, hebrewDate, chumash, 0);
 	print_shuir(&fontconf, hebrewDate, tehillim, 0);
-fontconf.margins.top += 150;
+fontconf.margins.top += skiptanya;
 	print_shuir(&fontconf, hebrewDate, rambam, 1);
 
 	fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
@@ -322,6 +330,26 @@ LIPCcode lipcCallback(LIPC *lipc, const char *name, LIPCevent *event __attribute
 	return ret;
 }
 
+int setScreenSize(uint32_t width, uint32_t height)
+{
+	syslog(LOG_INFO, "Screen width: %u\nScreen height: %u\n", width, height);
+	if (width == 600 &&  height == 800) { return 0;}
+	if (width == 1080 &&  height == 1440)
+	{
+		linespace = 135;
+		rightzmanmargin = 756;
+		skiptanya = 270;
+		basefontconf.margins.top = 90;
+		basefontconf.margins.right = 0;
+		basefontconf.size_pt = 30;
+		zmanbg = "/mnt/us/zman/base300.png";
+		shuirbg = "/mnt/us/zman/bgpicshuir300.png";
+		return 0;
+	}
+	syslog(LOG_INFO, "Unknown screen size: %u x %u\n", width, height);
+	return 0;
+}
+
 void config()
 {
 	ini_t *config = ini_load(CONFFILE);
@@ -352,21 +380,28 @@ int main()
 	config();
 	openlog(NULL, LOG_PID, LOG_DAEMON);
 
-	fbfd = fbink_open();
-	fbink_add_ot_font(FONTPATH, FNT_REGULAR);
-	fbink_init(fbfd, &configCT);
-	LIPC *lipc;
-	if ((lipc = LipcOpenNoName()) == NULL) {return 1;}
 	LIPCcode ret = LIPC_OK;
-	ret = LipcSubscribeExt(lipc, "com.lab126.powerd", NULL, &lipcCallback, NULL);
-	ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "unload", "screensaver");
 
-	sigwait(&set, &sig);
+	fbfd = fbink_open();
+	fbink_init(fbfd, &configCT);
+	FBInkState fbink_state;
+	fbink_get_state(&configCT, &fbink_state);
+	if ((ret = setScreenSize(fbink_state.screen_width, fbink_state.screen_height)) != 0) {
+		fbink_add_ot_font(FONTPATH, FNT_REGULAR);
+		LIPC *lipc;
+		if ((lipc = LipcOpenNoName()) != NULL)
+		{
+			ret = LipcSubscribeExt(lipc, "com.lab126.powerd", NULL, &lipcCallback, NULL);
+			ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "unload", "screensaver");
 
-	ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "load", "screensaver");
-	ret += LipcUnsubscribeExt(lipc, "com.lab126.powerd", NULL, NULL);
-	LipcClose(lipc);
-	fbink_free_ot_fonts();
+			sigwait(&set, &sig);
+
+			ret += LipcSetStringProperty(lipc, "com.lab126.blanket" , "load", "screensaver");
+			ret += LipcUnsubscribeExt(lipc, "com.lab126.powerd", NULL, NULL);
+			LipcClose(lipc);
+		} else {ret = 1;}
+		fbink_free_ot_fonts();
+	}
 	fbink_close(fbfd);
 	return ret;
 }

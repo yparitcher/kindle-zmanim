@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#####
+# Copyright (c) 2020 Y Paritcher
+#####
+
+convert -density 300 -depth 8 -size 1072x88 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 12 -gravity NorthEast -annotate +54+10 'ב"\ה'  -stroke black -strokewidth 10.8 -draw "line 0,90 1072,88" 000.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 010.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'עלות השחר' -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 030.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'משיכיר'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 040.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'נץ החמה'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 050.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 22 -gravity East -annotate +54+0 'קריאת שמע'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 060.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'חצות'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 070.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'מנחה גדולה'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 080.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 22 -gravity East -annotate +54+0 'שקיעה'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 090.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'צאת הכוכבים'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 100.png
+#convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 18 -gravity East -annotate +54+0 'יציאת השבת'  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 100.png
+convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey -fill black -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 020.png
+convert -density 300 -depth 8 [0-9][0-9]0.png -append -stroke black -strokewidth 10.8 -draw "line 0,0 0,1448" -draw "line 1072,0 1072,1448" -draw "line 0,0 1072,0" ../zman/base300.png
+
+rm ./[0-9][0-9]0.png

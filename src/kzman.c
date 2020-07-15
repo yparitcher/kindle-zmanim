@@ -334,12 +334,12 @@ int setScreenSize(uint32_t width, uint32_t height)
 {
 	syslog(LOG_INFO, "Screen width: %u\nScreen height: %u\n", width, height);
 	if (width == 600 &&  height == 800) { return 0;}
-	if (width == 1080 &&  height == 1440)
+	if (width == 1072 &&  height == 1448)
 	{
-		linespace = 135;
+		linespace = 136;
 		rightzmanmargin = 756;
-		skiptanya = 270;
-		basefontconf.margins.top = 90;
+		skiptanya = 272;
+		basefontconf.margins.top = 88;
 		basefontconf.margins.right = 0;
 		basefontconf.size_pt = 30;
 		zmanbg = "/mnt/us/zman/base300.png";

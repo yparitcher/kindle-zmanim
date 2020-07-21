@@ -350,6 +350,20 @@ int setScreenSize(uint32_t width, uint32_t height)
 	return 0;
 }
 
+void logCurrentTime()
+{
+	char final[32];
+	final[0] = '\0';
+	struct tm tm;
+	hdate now = getNow(place.EY);
+	time_t time = hdatetime_t(now);
+	localtime_r(&time, &tm);
+	strftime(final, 31, "%I:%M %p %Z", &tm);
+	syslog(LOG_INFO, "Start time: %s\n", final);
+	syslog(LOG_INFO, "Start time (Hebrew): %d:%d-%d %d:%d:%d\n", now.year, now.month, now.day, now.hour, now.min, now.sec);
+
+}
+
 void config()
 {
 	ini_t *config = ini_load(CONFFILE);
@@ -379,6 +393,8 @@ int main()
 	
 	config();
 	openlog(NULL, LOG_PID, LOG_DAEMON);
+
+	logCurrentTime();
 
 	LIPCcode ret = LIPC_OK;
 

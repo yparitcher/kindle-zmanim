@@ -36,10 +36,10 @@ struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 
 //screen size dependent
 int zmanlinespace = 75;
-int shuirlinespace = 75;
+int shuirlinespace = 70;
 int rightzmanmargin = 420;
 FBInkOTConfig zmanfontconf = {.margins={.top=50,.right=0}, .size_pt=30};
-FBInkOTConfig shuirfontconf = {.margins={.top=50,.right=0}, .size_pt=28};
+FBInkOTConfig shuirfontconf = {.margins={.top=30,.right=0}, .size_pt=28};
 const char* zmanbg = BASEPATH;
 const char* shuirbg = BGPSHPATH;
 

@@ -129,11 +129,7 @@ void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date,
 	char * buf2 = strchr(buf, '\n');
 	*buf2++ = '\0';
 	char * buf3 = strchr(buf2, '\n');;
-	if (buf3){
-		*buf3++ = '\0';
-		//memset(buf3, '\0', sizeof(char)*2);
-		//buf3+=sizeof(char)*2;
-	}
+	if (buf3){ *buf3++ = '\0';}
 	print_heb(buf, fontconf, margin);
 	print_heb(buf2, fontconf, margin);
 	if (buf3){

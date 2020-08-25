@@ -35,10 +35,11 @@ _Bool screenswitch = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 
 //screen size dependent
-int linespace = 75;
+int zmanlinespace = 75;
+int shuirlinespace = 75;
 int rightzmanmargin = 420;
-int skiptanya = 150;
-FBInkOTConfig basefontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+FBInkOTConfig zmanfontconf = {.margins={.top=50,.right=0}, .size_pt=30};
+FBInkOTConfig shuirfontconf = {.margins={.top=50,.right=0}, .size_pt=28};
 const char* zmanbg = BASEPATH;
 const char* shuirbg = BGPSHPATH;
 
@@ -74,29 +75,29 @@ hdate getnightfall(hdate date, location here)
 	else {return gettzaisbaalhatanya(date, here);}
 }
 
-void print_ot(const char* restrict string, FBInkOTConfig* fontconf, const FBInkConfig* restrict fbink_cfg)
+void print_ot(const char* restrict string, FBInkOTConfig* fontconf, const FBInkConfig* restrict fbink_cfg, int margin)
 {
 	fbink_print_ot(fbfd, string, fontconf, fbink_cfg, NULL);
-	fontconf->margins.top += linespace;
+	fontconf->margins.top += margin;
 }
 
-void print_heb(char* string, FBInkOTConfig* fontconf)
+void print_heb(char* string, FBInkOTConfig* fontconf, int margin)
 {
 	reverse_string(string);
-	print_ot(string, fontconf, &configCT);
+	print_ot(string, fontconf, &configCT, margin);
 }
 
-void print_time(hdate date, FBInkOTConfig* fontconf)
+void print_time(hdate date, FBInkOTConfig* fontconf, int margin)
 {
 	char final[10] = {'\0'};
 	time_t time = hdatetime_t(date);
 	struct tm tm;
 	localtime_r(&time, &tm);
 	strftime(final, 6, "%-I:%M", &tm);
-	print_ot(final, fontconf, &configLT);
+	print_ot(final, fontconf, &configLT, margin);
 }
 
-void print_parshah(FBInkOTConfig* fontconf, hdate date)
+void print_parshah(FBInkOTConfig* fontconf, hdate date, int margin)
 {
 	char parsha[50]={'\0'};
 	memset(parsha, 0, sizeof parsha);
@@ -117,32 +118,30 @@ void print_parshah(FBInkOTConfig* fontconf, hdate date)
 			strncat(parsha, yomtovformat(getyomtov(shabbos)), strlen(yomtovformat(getyomtov(shabbos))));
 		}
 	}
-	print_heb(parsha, fontconf);
+	print_heb(parsha, fontconf, margin);
 }
 
-void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date, char* buffer), _Bool rambam)
+void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date, char* buffer), int margin)
 {
 	char buf[100]={'\0'};
 	memset(buf, 0, sizeof buf);
 	(*f)(hebrewDate, buf);
 	char * buf2 = strchr(buf, '\n');
 	*buf2++ = '\0';
-	char * buf3 = NULL;
-	if (rambam){
-		buf3 = strstr(buf2, " - ");
-	}
+	char * buf3 = strchr(buf2, '\n');;
 	if (buf3){
-		memset(buf3, '\0', sizeof(char)*2);
-		buf3+=sizeof(char)*2;
+		*buf3++ = '\0';
+		//memset(buf3, '\0', sizeof(char)*2);
+		//buf3+=sizeof(char)*2;
 	}
-	print_heb(buf, fontconf);
-	print_heb(buf2, fontconf);
+	print_heb(buf, fontconf, margin);
+	print_heb(buf2, fontconf, margin);
 	if (buf3){
-		print_heb(++buf3, fontconf);
+		print_heb(buf3, fontconf, margin);
 	}
 }
 
-void print_date(FBInkOTConfig* fontconf, hdate* hebrewDate, location here)
+void print_date(FBInkOTConfig* fontconf, hdate* hebrewDate, location here, int margin)
 {
 	char buf[36];
 	size_t len = 36;
@@ -161,7 +160,7 @@ void print_date(FBInkOTConfig* fontconf, hdate* hebrewDate, location here)
 		len -= 7;
 	}
 	hdateformat(date, len, *hebrewDate);
-	print_heb(buf, fontconf);
+	print_heb(buf, fontconf, margin);
 }
 
 hdate getNow(_Bool EY)
@@ -181,24 +180,25 @@ void zman()
 	hdate hebrewDate = getNow(EY);
 
 	fbink_init(fbfd, &configCT);
-	FBInkOTConfig fontconf = basefontconf;
+	FBInkOTConfig fontconf = zmanfontconf;
 	fbink_cls(fbfd, &configCT, NULL);
 	fbink_print_image(fbfd, zmanbg, 0, 0, &configCT);
+	int margin = zmanlinespace;
 
-	print_date(&fontconf, &hebrewDate, here);
-	print_parshah(&fontconf, hebrewDate);
+	print_date(&fontconf, &hebrewDate, here, margin);
+	print_parshah(&fontconf, hebrewDate, margin);
 	
 	fbink_init(fbfd, &configLT);
 	fontconf.margins.right = rightzmanmargin;
 
-	print_time(getalosbaalhatanya(hebrewDate, here), &fontconf);
-	print_time(getmisheyakir10p2degrees(hebrewDate, here), &fontconf);
-	print_time(getsunrise(hebrewDate, here), &fontconf);
-	print_time(getshmabaalhatanya(hebrewDate, here), &fontconf);
-	print_time(getchatzosbaalhatanya(hebrewDate, here), &fontconf);
-	print_time(getminchagedolabaalhatanya(hebrewDate, here), &fontconf);
-	print_time(getsunset(hebrewDate, here), &fontconf);
-	print_time(getnightfall(hebrewDate, here), &fontconf);
+	print_time(getalosbaalhatanya(hebrewDate, here), &fontconf, margin);
+	print_time(getmisheyakir10p2degrees(hebrewDate, here), &fontconf, margin);
+	print_time(getsunrise(hebrewDate, here), &fontconf, margin);
+	print_time(getshmabaalhatanya(hebrewDate, here), &fontconf, margin);
+	print_time(getchatzosbaalhatanya(hebrewDate, here), &fontconf, margin);
+	print_time(getminchagedolabaalhatanya(hebrewDate, here), &fontconf, margin);
+	print_time(getsunset(hebrewDate, here), &fontconf, margin);
+	print_time(getnightfall(hebrewDate, here), &fontconf, margin);
 
 	fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
 	syslog(LOG_INFO, "zman: new picture\n");
@@ -210,17 +210,18 @@ void shuir()
 	_Bool EY = place.EY;
 	hdate hebrewDate = getNow(EY);
 
-	FBInkOTConfig fontconf = basefontconf;
+	FBInkOTConfig fontconf = shuirfontconf;
 	fbink_init(fbfd, &configCT);
 	fbink_cls(fbfd, &configCT, NULL);
 	fbink_print_image(fbfd, shuirbg, 0, 0, &configCT);
+	int margin = shuirlinespace;
 
-	print_date(&fontconf, &hebrewDate, here);
+	print_date(&fontconf, &hebrewDate, here, margin);
 
-	print_shuir(&fontconf, hebrewDate, chumash, 0);
-	print_shuir(&fontconf, hebrewDate, tehillim, 0);
-fontconf.margins.top += skiptanya;
-	print_shuir(&fontconf, hebrewDate, rambam, 1);
+	print_shuir(&fontconf, hebrewDate, chumash, margin);
+	print_shuir(&fontconf, hebrewDate, tehillim, margin);
+	print_shuir(&fontconf, hebrewDate, tanya, margin);
+	print_shuir(&fontconf, hebrewDate, rambam, margin);
 
 	fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
 	syslog(LOG_INFO, "shuir: new picture\n");
@@ -336,12 +337,15 @@ int setScreenSize(uint32_t width, uint32_t height)
 	if (width == 600 &&  height == 800) { return 0;}
 	if (width == 1072 &&  height == 1448)
 	{
-		linespace = 136;
+		zmanlinespace = 136;
+		shuirlinespace = 125;
 		rightzmanmargin = 756;
-		skiptanya = 272;
-		basefontconf.margins.top = 88;
-		basefontconf.margins.right = 0;
-		basefontconf.size_pt = 30;
+		zmanfontconf.margins.top = 88;
+		zmanfontconf.margins.right = 0;
+		zmanfontconf.size_pt = 30;
+		shuirfontconf.margins.top = 73;
+		shuirfontconf.margins.right = 0;
+		shuirfontconf.size_pt = 28;
 		zmanbg = "/mnt/us/zman/base300.png";
 		shuirbg = "/mnt/us/zman/bgpicshuir300.png";
 		return 0;

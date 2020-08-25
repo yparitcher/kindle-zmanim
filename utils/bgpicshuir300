@@ -4,17 +4,18 @@
 # Copyright (c) 2019 Y Paritcher
 #####
 
-convert -density 300 -depth 8 -size 1072x88 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 12 -gravity NorthEast -annotate +54+10 'ב"\ה'  -stroke black -strokewidth 10.8 -draw "line 0,90 1072,88" 000.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 010.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 020.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 030.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 040.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 050.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 060.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 070.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 080.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 090.png
-convert -density 300 -depth 8 -size 1072x136 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,136 1072,136" 100.png
+convert -density 300 -depth 8 -size 1072x73 canvas:lightgrey -fill black  -font ../zman/ezra.ttf -pointsize 12 -gravity NorthEast -annotate +54+3 'ב"\ה'  -stroke black -strokewidth 10.8 -draw "line 0,73 1072,73" 000.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 010.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 020.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 030.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 040.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 050.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 060.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 070.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 080.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 090.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 100.png
+convert -density 300 -depth 8 -size 1072x125 canvas:lightgrey  -stroke black -strokewidth 10.8 -draw "line 0,125 1072,125" 110.png
 
 convert -density 300 -depth 8 [0-9][0-9]0.png -append -stroke black -strokewidth 10.8 -draw "line 0,0 0,1448" -draw "line 1072,0 1072,1448" -draw "line 0,0 1072,0" ../zman/bgpicshuir300.png
 

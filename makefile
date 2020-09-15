@@ -48,5 +48,8 @@ KT4:
 	$(MAKE) FBInk CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
 	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)$(AR) RANLIB=$(PREFIXKT4)$(RANLIB)
 	$(PREFIXKT4)strip kzman
-	mv -f -t ./zman/ kzman
+	cp -t ./zman/ kzman
+
+install:
+	rsync kzman pw4:/mnt/us/zman
 

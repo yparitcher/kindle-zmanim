@@ -56,7 +56,11 @@ void reverse( char *start, char *end )
 char *reverse_char( char *start )
 {
     char *end = start;
-    while( (end[1] & 0xC0) == 0x80 ) end++;
+    if ((end[0] >= '0') && (end[0] <= '9')) {
+		while((end[1] >= '0') && (end[1] <= '9')) { end++; }
+	} else {
+		while( (end[1] & 0xC0) == 0x80 ) { end++; }
+    }
     reverse( start, end );
     return( end+1 );
 }

@@ -51,5 +51,7 @@ KT4:
 	cp -t ./zman/ kzman
 
 install:
+	ssh pw4 initctl stop kzman
 	rsync kzman pw4:/mnt/us/zman
+	ssh pw4 initctl start kzman
 

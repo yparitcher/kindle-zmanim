@@ -15,7 +15,7 @@
 			"checked": true,
 			"refresh": false,
 			"action": "initctl",
-			"params": "start zman"
+			"params": "start kzman"
 		},
 		{
 			"name": "Stop Zman",
@@ -24,7 +24,7 @@
 			"checked": true,
 			"refresh": false,
 			"action": "initctl",
-			"params": "stop zman"
+			"params": "stop kzman"
 		},
 		{
 			"name": "Refresh List",

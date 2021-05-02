@@ -32,6 +32,7 @@ struct {
 	location here;
 } place = {.here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34}, .EY=0};
 _Bool screenswitch = 0;
+_Bool program = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 
 //screen size dependent
@@ -270,7 +271,10 @@ void printSS()
 void goingToSS()
 {
 	fbink_dump(fbfd, &dump);
-	screenswitch = !screenswitch;
+	if (!program)
+	{
+		screenswitch = !screenswitch;
+	}
 	printSS();
 }
 
@@ -381,6 +385,13 @@ void config()
 		if (timez)
 		{
 			setenv("TZ", timez, 1);
+		}
+		const char *programs = ini_get(config, NULL, "program");
+		if(programs)
+		{
+			program = 1;
+			if (!strcmp(programs, "zman")) {screenswitch = 0;}
+			else if (!strcmp(programs, "shuir")) {screenswitch = 1;}
 		}
 		ini_free(config);
 	}

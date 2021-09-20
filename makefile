@@ -11,7 +11,7 @@ CFLAGS=-Wall -Wextra -O2 -flto $(INC_DIR:%=-I%)
 
 INI_DIR = ini/src
 VPATH = src $(INI_DIR)
-LIBS=:libzmanim.a fbink m lipc
+LIBS=:libzmanim.so fbink m lipc
 INC_DIR = libzmanim/include FBInk $(INI_DIR) include
 LIBDIR=libzmanim/lib FBInk/Release
 LDFLAGS=$(LIBDIR:%=-L%)
@@ -48,10 +48,11 @@ KT4:
 	$(MAKE) FBInk CROSS_TC=$$HOME/x-tools/arm-kindlepw2-linux-gnueabi/bin/arm-kindlepw2-linux-gnueabi
 	$(MAKE) kzman CC=$(PREFIXKT4)gcc AR=$(PREFIXKT4)$(AR) RANLIB=$(PREFIXKT4)$(RANLIB)
 	$(PREFIXKT4)strip kzman
+	cp -t ./zman/ libzmanim/lib/libzmanim.so
 	cp -t ./zman/ kzman
 
 install:
 	ssh pw4 initctl stop kzman
-	rsync kzman pw4:/mnt/us/zman
+	rsync -r zman/ pw4:/mnt/us/zman/
 	ssh pw4 initctl start kzman
 

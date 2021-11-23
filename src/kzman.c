@@ -128,7 +128,7 @@ void print_parshah(FBInkOTConfig* fontconf, hdate date, int margin)
 
 void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date, char* buffer), int margin)
 {
-	char buf[100]={'\0'};
+	char buf[250]={'\0'};
 	memset(buf, 0, sizeof buf);
 	(*f)(hebrewDate, buf);
 	char * buf2 = strchr(buf, '\n');

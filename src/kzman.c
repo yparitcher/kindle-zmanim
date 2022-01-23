@@ -34,6 +34,7 @@ struct {
 _Bool screenswitch = 0;
 _Bool program = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
+uint32_t rota = KEEP_CURRENT_ROTATE;
 
 //screen size dependent
 int zmanlinespace = 75;
@@ -182,7 +183,7 @@ void zman()
 
 	fbink_init(fbfd, &configCT);
 	FBInkOTConfig fontconf = zmanfontconf;
-	fbink_cls(fbfd, &configCT, NULL);
+	fbink_cls(fbfd, &configCT, NULL, 0);
 	fbink_print_image(fbfd, zmanbg, 0, 0, &configCT);
 	int margin = zmanlinespace;
 
@@ -213,7 +214,7 @@ void shuir()
 
 	FBInkOTConfig fontconf = shuirfontconf;
 	fbink_init(fbfd, &configCT);
-	fbink_cls(fbfd, &configCT, NULL);
+	fbink_cls(fbfd, &configCT, NULL, 0);
 	fbink_print_image(fbfd, shuirbg, 0, 0, &configCT);
 	int margin = shuirlinespace;
 
@@ -257,6 +258,11 @@ LIPCcode delta(LIPC *lipc)
 
 void printSS()
 {
+	FBInkState state = {0};
+	fbink_get_state(&configCT, &state);
+	uint8_t current_rota = state.current_rota;
+	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+	if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
 	switch (screenswitch)
 	{
 		case 0:
@@ -266,6 +272,8 @@ void printSS()
 			shuir();
 			break;
 	}
+	int ret2 = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+	if (ret) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret2);}
 }
 
 void goingToSS()
@@ -381,6 +389,7 @@ void config()
 		ini_sget(config, NULL, "longitude", "%lf", &place.here.longitude);
 		ini_sget(config, NULL, "elevation", "%lf", &place.here.elevation);
 		ini_sget(config, NULL, "EY", "%d", &place.EY);
+		ini_sget(config, NULL, "rota", "%lu", &rota);
 		const char *timez = ini_get(config, NULL, "timezone");
 		if (timez)
 		{

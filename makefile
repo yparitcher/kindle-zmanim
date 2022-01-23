@@ -31,7 +31,7 @@ libzmanim:
 	cd $@ && $(MAKE) $(TARGETLIBZMANIM)
 
 FBInk:
-	cd $@ && $(MAKE) $(TARGETFBINK) MINIMAL=1 IMAGE=1 OPENTYPE=1 CFLAGS=-flto
+	cd $@ && $(MAKE) $(TARGETFBINK)=1 MINIMAL=1 IMAGE=1 OPENTYPE=1 CFLAGS=-flto staticlib
 
 clean:
 	$(MAKE) submodules TARGETLIBZMANIM=cleaner TARGETFBINK=clean

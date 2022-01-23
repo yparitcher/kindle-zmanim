@@ -274,12 +274,12 @@ void printSS()
 void goingToSS()
 {
 	fbink_dump(fbfd, &dump);
-	fbink_init(fbfd, &configCT);
+	//fbink_init(fbfd, &configCT);
 	FBInkState state = {0};
 	fbink_get_state(&configCT, &state);
 	current_rota = state.current_rota;
 	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret && ret != -ENOSYS) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
+	if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
 
 	if (!program)
 	{
@@ -294,7 +294,7 @@ void outOfSS()
 
     syslog(LOG_INFO, "Rota: %d\n", current_rota);
 	int ret = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret && ret != -ENOSYS) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret);}
+	if (ret) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret);}
 
 	if (access("/var/tmp/koreader.sh" , F_OK)) {
 		syslog(LOG_INFO, "Restoring dump\n");

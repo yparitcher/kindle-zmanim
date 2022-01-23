@@ -19,7 +19,8 @@ LDLIBS=$(LIBS:%=-l%)
 
 .PHONY: libzmanim FBInk submodules clean default kindle
 TARGETLIBZMANIM=kindle
-TARGETFBINK=kindle
+TARGETFBINK=
+FBINKMAKE=staticlib
 
 default: KT4
 
@@ -31,14 +32,14 @@ libzmanim:
 	cd $@ && $(MAKE) $(TARGETLIBZMANIM)
 
 FBInk:
-	cd $@ && $(MAKE) $(TARGETFBINK)=1 MINIMAL=1 IMAGE=1 OPENTYPE=1 CFLAGS=-flto staticlib
+	cd $@ && $(MAKE) KINDLE=1 $(TARGETFBINK) MINIMAL=1 IMAGE=1 OPENTYPE=1 CFLAGS=-flto $(FBINKMAKE)
 
 clean:
-	$(MAKE) submodules TARGETLIBZMANIM=cleaner TARGETFBINK=clean
+	$(MAKE) submodules TARGETLIBZMANIM=cleaner FBINKMAKE=distclean
 	rm -f kzman kzman.o ini.o
 
 kindle:
-	$(MAKE) submodules TARGETFBINK=legacy CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
+	$(MAKE) submodules TARGETFBINK="LEGACY=1" CROSS_TC=$$HOME/x-tools/arm-kindle5-linux-gnueabi/bin/arm-kindle5-linux-gnueabi
 	$(MAKE) kzman CC=$(PREFIX)gcc AR=$(PREFIX)$(AR) RANLIB=$(PREFIX)$(RANLIB)
 	$(PREFIX)strip kzman
 	mv -f -t ./zman/ kzman

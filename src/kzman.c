@@ -7,6 +7,7 @@ Copyright (c) 2018 Y Paritcher
 #define BGPSHPATH "/mnt/us/zman/bgpicshuir.png"
 #define CONFFILE "/mnt/us/zman/zman.conf"
 
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +36,7 @@ _Bool screenswitch = 0;
 _Bool program = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 uint32_t rota = KEEP_CURRENT_ROTATE;
+uint32_t current_rota;
 
 //screen size dependent
 int zmanlinespace = 75;
@@ -258,11 +260,6 @@ LIPCcode delta(LIPC *lipc)
 
 void printSS()
 {
-	FBInkState state = {0};
-	fbink_get_state(&configCT, &state);
-	uint8_t current_rota = state.current_rota;
-	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
 	switch (screenswitch)
 	{
 		case 0:
@@ -272,13 +269,18 @@ void printSS()
 			shuir();
 			break;
 	}
-	int ret2 = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret2);}
 }
 
 void goingToSS()
 {
 	fbink_dump(fbfd, &dump);
+	fbink_init(fbfd, &configCT);
+	FBInkState state = {0};
+	fbink_get_state(&configCT, &state);
+	current_rota = state.current_rota;
+	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+	if (ret && ret != -ENOSYS) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
+
 	if (!program)
 	{
 		screenswitch = !screenswitch;
@@ -289,6 +291,11 @@ void goingToSS()
 void outOfSS()
 {
 	syslog(LOG_INFO, "outOfScreenSaver\n");
+
+    syslog(LOG_INFO, "Rota: %d\n", current_rota);
+	int ret = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+	if (ret && ret != -ENOSYS) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret);}
+
 	if (access("/var/tmp/koreader.sh" , F_OK)) {
 		syslog(LOG_INFO, "Restoring dump\n");
 		fbink_restore(fbfd, &configRF, &dump);

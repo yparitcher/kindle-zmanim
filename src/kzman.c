@@ -36,7 +36,7 @@ _Bool screenswitch = 0;
 _Bool program = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 uint32_t rota = KEEP_CURRENT_ROTATE;
-uint32_t current_rota;
+int deltaG = -1;
 
 //screen size dependent
 int zmanlinespace = 75;
@@ -147,8 +147,8 @@ void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date,
 
 void print_date(FBInkOTConfig* fontconf, hdate* hebrewDate, location here, int margin)
 {
-	char buf[36];
-	size_t len = 36;
+	char buf[37];
+	size_t len = 37;
 	memset(buf, 0, sizeof buf);
 	char *date = buf;
 	hdate night = getnightfall(*hebrewDate, here);
@@ -254,12 +254,20 @@ LIPCcode delta(LIPC *lipc)
 	LIPCcode ret = LIPC_OK;
 	ret = LipcSetIntProperty(lipc, "com.lab126.powerd", "rtcWakeup", delta);
 
+	deltaG = delta;
 	syslog(LOG_INFO, "delta: %d\n", delta);
 	return ret;
 }
 
 void printSS()
 {
+	FBInkState state = {0};
+	fbink_get_state(&configCT, &state);
+	uint32_t current_rota = state.current_rota;
+	syslog(LOG_INFO, "Rota: %d\n", current_rota);
+	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+	if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
+
 	switch (screenswitch)
 	{
 		case 0:
@@ -269,17 +277,14 @@ void printSS()
 			shuir();
 			break;
 	}
+
+	int ret2 = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+	if (ret2) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret2);}
 }
 
 void goingToSS()
 {
 	fbink_dump(fbfd, &dump);
-	//fbink_init(fbfd, &configCT);
-	FBInkState state = {0};
-	fbink_get_state(&configCT, &state);
-	current_rota = state.current_rota;
-	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
 
 	if (!program)
 	{
@@ -291,11 +296,6 @@ void goingToSS()
 void outOfSS()
 {
 	syslog(LOG_INFO, "outOfScreenSaver\n");
-
-    syslog(LOG_INFO, "Rota: %d\n", current_rota);
-	int ret = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret);}
-
 	if (access("/var/tmp/koreader.sh" , F_OK)) {
 		syslog(LOG_INFO, "Restoring dump\n");
 		fbink_restore(fbfd, &configRF, &dump);
@@ -333,8 +333,8 @@ LIPCcode wakeup(LIPC *lipc, LIPCevent *event)
 	if (print) {printSS();}
 	return ret;
 }
-
-LIPCcode lipcCallback(LIPC *lipc, const char *name, LIPCevent *event __attribute__ ((unused)), void *data __attribute__ ((unused)))
+*/
+LIPCcode lipcCallback(LIPC *lipc, const char *name, LIPCevent *event, void *data __attribute__ ((unused)))
 {
 
 	LIPCcode ret = LIPC_OK;

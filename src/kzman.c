@@ -32,7 +32,7 @@ struct {
 	_Bool EY;
 	location here;
 } place = {.here = {.latitude = 40.66896, .longitude = -73.94284, .elevation = 34}, .EY=0};
-_Bool screenswitch = 0;
+int screenswitch = 0;
 _Bool program = 0;
 struct timespec sleeptime = {.tv_sec=1, .tv_nsec=500000000};
 uint32_t rota = KEEP_CURRENT_ROTATE;
@@ -231,6 +231,11 @@ void shuir()
 	syslog(LOG_INFO, "shuir: new picture\n");
 }
 
+void PW5()
+{
+	//Stub
+}
+
 LIPCcode delta(LIPC *lipc)
 {
 	location here = place.here;
@@ -275,6 +280,9 @@ void printSS()
 			break;
 		case 1:
 			shuir();
+			break;
+		case 2:
+			PW5();
 			break;
 	}
 
@@ -367,6 +375,12 @@ int setScreenSize(uint32_t width, uint32_t height)
 		shuirfontconf.size_pt = 28;
 		zmanbg = "/mnt/us/zman/base300.png";
 		shuirbg = "/mnt/us/zman/bgpicshuir300.png";
+		return 0;
+	}
+	if (width == 1236 &&  height == 1648)
+	{
+		program = 1;
+		screenswitch = 2;
 		return 0;
 	}
 	syslog(LOG_INFO, "Unknown screen size: %u x %u\n", width, height);

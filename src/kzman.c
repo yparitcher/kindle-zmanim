@@ -270,8 +270,10 @@ void printSS()
 	fbink_get_state(&configCT, &state);
 	uint32_t current_rota = state.current_rota;
 	syslog(LOG_INFO, "Rota: %d\n", current_rota);
-	int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
+	if (rota != KEEP_CURRENT_ROTATE) {
+		int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+		if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
+	}
 
 	switch (screenswitch)
 	{
@@ -286,8 +288,10 @@ void printSS()
 			break;
 	}
 
-	int ret2 = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
-	if (ret2) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret2);}
+	if (rota != KEEP_CURRENT_ROTATE) {
+		int ret2 = fbink_set_fb_info(fbfd, current_rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+		if (ret2) {syslog(LOG_INFO, "Error reseting rotation: %d\n", ret2);}
+	}
 }
 
 void goingToSS()

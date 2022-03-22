@@ -271,7 +271,8 @@ void printSS()
 	uint32_t current_rota = state.current_rota;
 	syslog(LOG_INFO, "Rota: %d\n", current_rota);
 	if (rota != KEEP_CURRENT_ROTATE) {
-		int ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
+		int ret = fbink_reinit(fbfd, &configCT);
+		ret = fbink_set_fb_info(fbfd, rota, KEEP_CURRENT_BITDEPTH, KEEP_CURRENT_GRAYSCALE, &configCT);
 		if (ret) {syslog(LOG_INFO, "Error rotating: %d\n", ret);}
 	}
 

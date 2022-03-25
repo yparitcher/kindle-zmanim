@@ -191,7 +191,7 @@ void zman()
 
 	print_date(&fontconf, &hebrewDate, here, margin);
 	print_parshah(&fontconf, hebrewDate, margin);
-	
+
 	fbink_init(fbfd, &configLT);
 	fontconf.margins.right = rightzmanmargin;
 
@@ -234,6 +234,19 @@ void shuir()
 void PW5()
 {
 	//Stub
+	location here = place.here;
+	_Bool EY = place.EY;
+	hdate hebrewDate = getNow(EY);
+
+	int ret = fbink_reinit(fbfd, &configCT);
+	fbink_cls(fbfd, &configCT, NULL, 0);
+	fbink_print_image(fbfd, "/mnt/us/zman/basepw5.png", 0, 0, &configCT);
+
+	FBInkOTConfig fontconf = {.margins={.top=0,.bottom=129,}, .size_pt=28};
+	print_date(&fontconf, &hebrewDate, here, 0);
+
+	fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
+	syslog(LOG_INFO, "PW5: new picture\n");
 }
 
 LIPCcode delta(LIPC *lipc)
@@ -243,10 +256,10 @@ LIPCcode delta(LIPC *lipc)
 	hdate hebrewDate = getNow(EY);
 	int delta;
 	hdate next = getalosbaalhatanya(hebrewDate, here);
-	if 	(hdatecompare(hebrewDate, next) != 1)
+	if (hdatecompare(hebrewDate, next) != 1)
 	{
 		next = getnightfall(hebrewDate, here);
-		if 	(hdatecompare(hebrewDate, next) != 1)
+		if (hdatecompare(hebrewDate, next) != 1)
 		{
 			hdate tomorrow = hebrewDate;
 			hdateaddday(&tomorrow, 1);
@@ -386,6 +399,7 @@ int setScreenSize(uint32_t width, uint32_t height)
 	{
 		program = 1;
 		screenswitch = 2;
+		if (rota == KEEP_CURRENT_ROTATE) {rota = FB_ROTATE_CW;}
 		return 0;
 	}
 	syslog(LOG_INFO, "Unknown screen size: %u x %u\n", width, height);
@@ -440,7 +454,7 @@ int main()
 	sigaddset(&set, SIGTERM);
 	sigaddset(&set, SIGINT);
 	sigprocmask(SIG_BLOCK, &set, NULL);
-	
+
 	config();
 	openlog(NULL, LOG_PID, LOG_DAEMON);
 

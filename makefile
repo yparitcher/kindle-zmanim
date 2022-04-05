@@ -14,7 +14,7 @@ VPATH = src $(INI_DIR)
 LIBS=:libzmanim.so fbink m lipc
 INC_DIR = libzmanim/include FBInk $(INI_DIR) include
 LIBDIR=libzmanim/lib FBInk/Release
-LDFLAGS=$(LIBDIR:%=-L%)
+LDFLAGS=$(LIBDIR:%=-L%) -Wl,-rpath=/mnt/us/koreader/rocks/lib/lua/5.1/
 LDLIBS=$(LIBS:%=-l%)
 
 .PHONY: libzmanim FBInk submodules clean default kindle
@@ -53,7 +53,8 @@ KT4:
 	cp -t ./zman/ kzman
 
 install:
-	ssh wpw4 initctl stop kzman
-	rsync -r zman/ wpw4:/mnt/us/zman/
-	ssh wpw4 initctl start kzman
+	#ssh wpw5 initctl stop kzman
+	rsync -r zman/ wpw5:/mnt/us/zman/
+	ssh wpw5 "/mnt/us/zman/kzman test"
+	#ssh wpw5 initctl start kzman
 

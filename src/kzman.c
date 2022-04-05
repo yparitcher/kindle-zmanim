@@ -376,6 +376,14 @@ LIPCcode lipcCallback(LIPC *lipc, const char *name, LIPCevent *event, void *data
 	return ret;
 }
 
+int pw5_test()
+{
+	printSS();
+	fbink_free_ot_fonts();
+	fbink_close(fbfd);
+	return 0;
+}
+
 int setScreenSize(uint32_t width, uint32_t height)
 {
 	syslog(LOG_INFO, "Screen width: %u\nScreen height: %u\n", width, height);
@@ -399,7 +407,7 @@ int setScreenSize(uint32_t width, uint32_t height)
 	{
 		program = 1;
 		screenswitch = 2;
-		if (rota == KEEP_CURRENT_ROTATE) {rota = FB_ROTATE_CW;}
+		if (rota == KEEP_CURRENT_ROTATE) {rota = FB_ROTATE_UR;}
 		return 0;
 	}
 	syslog(LOG_INFO, "Unknown screen size: %u x %u\n", width, height);
@@ -446,7 +454,7 @@ void config()
 	}
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	int sig;
 	sigset_t set;
@@ -468,6 +476,9 @@ int main()
 	fbink_get_state(&configCT, &fbink_state);
 	if ((ret = setScreenSize(fbink_state.screen_width, fbink_state.screen_height)) == 0) {
 		fbink_add_ot_font(FONTPATH, FNT_REGULAR);
+		if (argc == 2 && !strcmp(argv[1], "test") ) {
+			return pw5_test();
+		}
 		LIPC *lipc;
 		if ((lipc = LipcOpenNoName()) != NULL)
 		{

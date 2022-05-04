@@ -28,6 +28,7 @@ const FBInkConfig configLT = {.is_quiet=1, .halign=EDGE, .no_refresh=1, .is_bgle
 const FBInkConfig configRF = {.is_quiet=1, .is_flashing=1};
 int fbfd;
 FBInkDump dump = {0};
+FBInkDump comparator = {0};
 struct {
 	_Bool EY;
 	location here;
@@ -264,6 +265,27 @@ void pw5_shuir(char * buf, char ** b2, char ** b3, size_t sz, hdate hebrewDate, 
 	if (buf3){ reverse_string(buf3); *b3 = buf3;}
 }
 
+_Bool dump_compare()
+{
+	_Bool ret = 0;
+	if(comparator.data) {
+		FBInkDump current = {0};
+		fbink_dump(fbfd, &current);
+		if(
+			(comparator.is_full == current.is_full) &&
+			(comparator.bpp == current.bpp) &&
+			(comparator.rota == current.rota) &&
+			(comparator.size == current.size) &&
+			(comparator.stride == current.stride) &&
+			(!memcmp(comparator.data, current.data, current.size))
+		) { ret = 1;}
+		fbink_free_dump_data(&current);
+	}
+	if(ret) {syslog(LOG_INFO, "Refresh Prevented\n");}
+	fbink_free_dump_data(&comparator);
+	return ret;
+}
+
 void PW5()
 {
 	//Stub
@@ -275,6 +297,7 @@ void PW5()
 	char * buf2 = NULL;
 	char * buf3 = NULL;
 
+	fbink_dump(fbfd, &comparator);
 	fbink_cls(fbfd, &configCT, NULL, 0);
 	fbink_print_image(fbfd, "/mnt/us/zman/basepw5.png", 0, 0, &configCT);
 	FBInkConfig pw5conf = {.is_quiet=1, .no_refresh=1, .is_bgless=1, .is_centered=1, .is_halfway=1,};
@@ -343,7 +366,9 @@ void PW5()
 	if (buf3) {fbink_printf(fbfd, &Rconf, &pw5conf, "%s - %s", buf3, buf2);}
 	else {pw5_print(1116,-1236,0,0, &pw5conf, buf2);}
 
-	fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
+	if(!dump_compare()) {
+		fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
+	}
 	syslog(LOG_INFO, "PW5: new picture\n");
 }
 

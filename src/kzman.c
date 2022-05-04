@@ -89,10 +89,10 @@ void print_ot(const char* restrict string, FBInkOTConfig* fontconf, const FBInkC
 	fontconf->margins.top += margin;
 }
 
-void print_heb(char* string, FBInkOTConfig* fontconf, int margin)
+void print_heb(char* string, FBInkOTConfig* fontconf, const FBInkConfig* restrict fbink_cfg, int margin)
 {
 	reverse_string(string);
-	print_ot(string, fontconf, &configCT, margin);
+	print_ot(string, fontconf, fbink_cfg, margin);
 }
 
 void print_time(hdate date, FBInkOTConfig* fontconf, int margin)
@@ -126,7 +126,7 @@ void print_parshah(FBInkOTConfig* fontconf, hdate date, int margin)
 			strncat(parsha, yomtovformat(getyomtov(shabbos)), strlen(yomtovformat(getyomtov(shabbos))));
 		}
 	}
-	print_heb(parsha, fontconf, margin);
+	print_heb(parsha, fontconf, &configCT, margin);
 }
 
 void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date, char* buffer), int margin)
@@ -138,14 +138,14 @@ void print_shuir(FBInkOTConfig* fontconf, hdate hebrewDate, int (*f)(hdate date,
 	*buf2++ = '\0';
 	char * buf3 = strchr(buf2, '\n');;
 	if (buf3){ *buf3++ = '\0';}
-	print_heb(buf, fontconf, margin);
-	print_heb(buf2, fontconf, margin);
+	print_heb(buf, fontconf, &configCT, margin);
+	print_heb(buf2, fontconf, &configCT, margin);
 	if (buf3){
-		print_heb(buf3, fontconf, margin);
+		print_heb(buf3, fontconf, &configCT, margin);
 	}
 }
 
-void print_date(FBInkOTConfig* fontconf, hdate* hebrewDate, location here, int margin)
+void print_date(FBInkOTConfig* fontconf, const FBInkConfig* restrict fbink_cfg, hdate* hebrewDate, location here, int margin)
 {
 	char buf[37];
 	size_t len = 37;
@@ -164,7 +164,7 @@ void print_date(FBInkOTConfig* fontconf, hdate* hebrewDate, location here, int m
 		len -= 7;
 	}
 	hdateformat(date, len, *hebrewDate);
-	print_heb(buf, fontconf, margin);
+	print_heb(buf, fontconf, fbink_cfg, margin);
 }
 
 hdate getNow(_Bool EY)
@@ -189,7 +189,7 @@ void zman()
 	fbink_print_image(fbfd, zmanbg, 0, 0, &configCT);
 	int margin = zmanlinespace;
 
-	print_date(&fontconf, &hebrewDate, here, margin);
+	print_date(&fontconf, &configCT, &hebrewDate, here, margin);
 	print_parshah(&fontconf, hebrewDate, margin);
 
 	fbink_init(fbfd, &configLT);
@@ -220,7 +220,7 @@ void shuir()
 	fbink_print_image(fbfd, shuirbg, 0, 0, &configCT);
 	int margin = shuirlinespace;
 
-	print_date(&fontconf, &hebrewDate, here, margin);
+	print_date(&fontconf, &configCT, &hebrewDate, here, margin);
 
 	print_shuir(&fontconf, hebrewDate, chumash, margin);
 	print_shuir(&fontconf, hebrewDate, tehillim, margin);
@@ -231,6 +231,39 @@ void shuir()
 	syslog(LOG_INFO, "shuir: new picture\n");
 }
 
+void pw5_print(short int top, short int bottom, short int left, short int right, const FBInkConfig* restrict fbink_cfg, const char* restrict string)
+{
+	FBInkOTConfig fontconf = {.margins={.top=top, .bottom=bottom, .left=left, .right=right}, .size_pt=28};
+	fbink_print_ot(fbfd, string, &fontconf, fbink_cfg, NULL);
+	
+}
+
+void pw5_time(short int top, short int bottom, short int left, short int right, const FBInkConfig* restrict fbink_cfg, hdate date)
+{
+	char final[10] = {'\0'};
+	time_t time = hdatetime_t(date);
+	struct tm tm;
+	localtime_r(&time, &tm);
+	strftime(final, 6, "%-I:%M", &tm);
+	pw5_print(top, bottom, left, right, fbink_cfg, final);
+}
+
+void pw5_shuir(char * buf, char ** b2, char ** b3, size_t sz, hdate hebrewDate, int (*f)(hdate date, char* buffer))
+{
+	memset(buf, 0, sz);
+	*b2 = NULL;
+	*b3 = NULL;
+	(*f)(hebrewDate, buf);
+	char * buf2 = strchr(buf, '\n');
+	*buf2++ = '\0';
+	char * buf3 = strchr(buf2, '\n');;
+	if (buf3){ *buf3++ = '\0';}
+	reverse_string(buf);
+	reverse_string(buf2);
+	*b2 = buf2;
+	if (buf3){ reverse_string(buf3); *b3 = buf3;}
+}
+
 void PW5()
 {
 	//Stub
@@ -238,12 +271,77 @@ void PW5()
 	_Bool EY = place.EY;
 	hdate hebrewDate = getNow(EY);
 
-	int ret = fbink_reinit(fbfd, &configCT);
+	char buf[250]={'\0'};
+	char * buf2 = NULL;
+	char * buf3 = NULL;
+
 	fbink_cls(fbfd, &configCT, NULL, 0);
 	fbink_print_image(fbfd, "/mnt/us/zman/basepw5.png", 0, 0, &configCT);
+	FBInkConfig pw5conf = {.is_quiet=1, .no_refresh=1, .is_bgless=1, .is_centered=1, .is_halfway=1,};
+	FBInkConfig pw5Rconf = {.is_quiet=1, .no_refresh=1, .is_bgless=1, .halign=EDGE, .is_halfway=1,};
+	FBInkOTConfig bh = {.margins={.right=5,}, .size_pt=10};
+	fbink_print_ot(fbfd, "ה\"ב", &bh, &configLT, NULL);
 
-	FBInkOTConfig fontconf = {.margins={.top=0,.bottom=129,}, .size_pt=28};
-	print_date(&fontconf, &hebrewDate, here, 0);
+	FBInkOTConfig fontconf = {.margins={.top=0,.bottom=-120,}, .size_pt=28};
+	print_date(&fontconf, &pw5conf, &hebrewDate, here, 0);
+
+	pw5_print(120,-244,0,50, &pw5Rconf, "תולע");
+	pw5_print(248,-368,0,50, &pw5Rconf, "ריכישמ");
+	pw5_print(372,-492,0,50, &pw5Rconf, "המחה ץנ");
+	pw5_print(496,-616,0,50, &pw5Rconf, "עמש תאירק");
+	pw5_print(620,-740,0,50, &pw5Rconf, "הליפת");
+	pw5_print(744,-864,0,50, &pw5Rconf, "תוצח");
+	pw5_print(120,-244,0,874, &pw5Rconf, "הלודג החנמ");
+	pw5_print(248,-368,0,874, &pw5Rconf, "הנטק החנמ");
+	pw5_print(372,-492,0,874, &pw5Rconf, "החנמה גלפ");
+
+	pw5_time(120,-244,0,575, &pw5Rconf, getalosbaalhatanya(hebrewDate, here));
+	pw5_time(248,-368,0,575, &pw5Rconf, getmisheyakir10p2degrees(hebrewDate, here));
+	pw5_time(372,-492,0,575, &pw5Rconf, getsunrise(hebrewDate, here));
+	pw5_time(496,-616,0,575, &pw5Rconf, getshmabaalhatanya(hebrewDate, here));
+	pw5_time(620,-740,0,575, &pw5Rconf, gettefilabaalhatanya(hebrewDate, here));
+	pw5_time(744,-864,0,575, &pw5Rconf, getchatzosbaalhatanya(hebrewDate, here));
+	pw5_time(120,-244,0,1399, &pw5Rconf, getminchagedolabaalhatanya(hebrewDate, here));
+	pw5_time(248,-368,0,1399, &pw5Rconf, getminchaketanabaalhatanya(hebrewDate, here));
+	pw5_time(372,-492,0,1399, &pw5Rconf, getplagbaalhatanya(hebrewDate, here));
+
+	short int off = 0;
+	if (1 == iscandlelighting(hebrewDate))
+	{
+		off = 124;
+		pw5_print(496,-616,0,874, &pw5Rconf, "תורנ תקלדה");
+		pw5_time(496,-616,0,1399, &pw5Rconf, getcandlelighting(hebrewDate, here));
+	} else {
+		pw5_shuir(buf, &buf2, &buf3, sizeof buf, hebrewDate, tehillim);
+		pw5_print(744,-864,0,826, &pw5conf, buf2);
+	}
+	pw5_print(496+off,-616-off,0,874, &pw5Rconf, "העיקש");
+	pw5_time(496+off,-616-off,0,1399, &pw5Rconf, getsunset(hebrewDate, here));
+	if (!isassurbemelachah(hebrewDate))
+	{
+		pw5_print(620+off,-740-off,0,874, &pw5Rconf, "תאצ");
+		pw5_time(620+off,-740-off,0,1399, &pw5Rconf, gettzaisbaalhatanya(hebrewDate, here));
+	} else {
+		if (hebrewDate.wday == 0) {
+			pw5_print(620+off,-740-off,0,874, &pw5Rconf, "תבשה תאיצי");
+		} else {
+			pw5_print(620+off,-740-off,0,874, &pw5Rconf, "גחה תאיצי");
+		}
+		pw5_time(620+off,-740-off,0,1399, &pw5Rconf, gettzais8p5(hebrewDate, here));
+	}
+
+	pw5_shuir(buf, &buf2, &buf3, sizeof buf, hebrewDate, chumash);
+	FBInkOTConfig Sconf = {.margins={.top=868,.bottom=-988,}, .size_pt=28};
+	fbink_printf(fbfd, &Sconf, &pw5conf, "%s - %s", buf2, buf);
+
+	pw5_shuir(buf, &buf2, &buf3, sizeof buf, hebrewDate, tanya);
+	FBInkOTConfig Tconf = {.margins={.top=992,.bottom=-1112,}, .size_pt=28};
+	fbink_printf(fbfd, &Tconf, &pw5conf, "%s - %s", buf3, buf2);
+
+	pw5_shuir(buf, &buf2, &buf3, sizeof buf, hebrewDate, rambam);
+	FBInkOTConfig Rconf = {.margins={.top=1116,.bottom=-1236,}, .size_pt=28};
+	if (buf3) {fbink_printf(fbfd, &Rconf, &pw5conf, "%s - %s", buf3, buf2);}
+	else {pw5_print(1116,-1236,0,0, &pw5conf, buf2);}
 
 	fbink_refresh(fbfd, 0, 0, 0, 0, &configRF);
 	syslog(LOG_INFO, "PW5: new picture\n");
@@ -349,13 +447,45 @@ LIPCcode wakeup(LIPC *lipc, LIPCevent *event)
 	LipcFreeString(state);
 //**********
 //syslog(LOG_WARNING, "Name: %s\n", LipcGetEventName(event));
+int intparam = 0;
+//char* stringparam = NULL;
+LipcGetIntParam(event, &intparam);
+//LipcGetStringParam(event, &stringparam);
+syslog(LOG_WARNING, "Wakup Int: %d\tDelta: %d\tDiff: %d\n", intparam, deltaG, deltaG - intparam);
+deltaG = -1;
+//syslog(LOG_WARNING, "String: %s\n", stringparam);
+//**********
+	if (print) {printSS();}
+	return ret;
+}
+/*
+LIPCcode resume(LIPC *lipc, LIPCevent *event)
+{
+	LIPCcode ret = LIPC_OK;
+	char* state = NULL;
+	_Bool print = 0;
+	ret = LipcGetStringProperty(lipc, "com.lab126.powerd", "state", &state);
+	if(ret){return ret;}
+	syslog(LOG_INFO, "wakeupFromSuspend state: %s\n", state);
+	if (!strcmp(state, "screenSaver") || !strcmp(state, "suspended"))
+	{
+		LipcFreeString(state);
+		state = NULL;
+		nanosleep(&sleeptime, NULL);
+		ret = LipcGetStringProperty(lipc, "com.lab126.powerd", "state", &state);
+		syslog(LOG_INFO, "wakeupFromSuspend state wait: %s\n", state);
+		if (!strcmp(state, "screenSaver") || !strcmp(state, "suspended")){print=1;}
+	}
+	LipcFreeString(state);
+//
+//syslog(LOG_WARNING, "Name: %s\n", LipcGetEventName(event));
 //int intparam = 0;
 //char* stringparam = NULL;
 //LipcGetIntParam(event, &intparam);
 //LipcGetStringParam(event, &stringparam);
 //syslog(LOG_WARNING, "Int: %d\n", intparam);
 //syslog(LOG_WARNING, "String: %s\n", stringparam);
-//**********
+//
 	if (print) {printSS();}
 	return ret;
 }
@@ -370,6 +500,8 @@ LIPCcode lipcCallback(LIPC *lipc, const char *name, LIPCevent *event, void *data
 		goingToSS();
 	} else if (!strcmp(name, "wakeupFromSuspend")){
 		ret = wakeup(lipc, event);
+//	} else if (!strcmp(name, "resuming")){
+//		ret = resume(lipc, event);
 	} else if (!strcmp(name, "readyToSuspend")){
 		ret = delta(lipc);
 	}
@@ -403,7 +535,7 @@ int setScreenSize(uint32_t width, uint32_t height)
 		shuirbg = "/mnt/us/zman/bgpicshuir300.png";
 		return 0;
 	}
-	if (width == 1236 &&  height == 1648)
+	if ((width == 1236 && height == 1648) || (width == 1648 && height == 1236))
 	{
 		program = 1;
 		screenswitch = 2;

@@ -14,6 +14,6 @@ convert -density 300 -depth 8 -size 1648x124 canvas:lightgrey -fill black -strok
 convert -density 300 -depth 8 -size 1648x124 canvas:lightgrey -fill black -stroke black -strokewidth 10.8 -draw "line 0,124 1648,124" 080.png
 convert -density 300 -depth 8 -size 1648x124 canvas:lightgrey -fill black -stroke black -strokewidth 10.8 -draw "line 0,124 1648,124" 090.png
 convert -density 300 -depth 8 -size 1648x120 canvas:lightgrey 100.png
-convert -density 300 -depth 8 [0-9][0-9]0.png -append -stroke black -strokewidth 4 -draw "line 2,0 2,1236" -draw "line 824,496 824,1236" -draw "line 1645,0 1645,1236" ../zman/basepw5.png
+convert -density 300 -depth 8 [0-9][0-9]0.png -append -stroke black -strokewidth 4 -draw "line 2,0 2,1236" -draw "line 824,124 824,864" -draw "line 1645,0 1645,1236" ../zman/basepw5.png
 
 rm ./[0-9][0-9]0.png
